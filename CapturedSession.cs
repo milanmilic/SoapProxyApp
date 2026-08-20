@@ -13,7 +13,8 @@ namespace SoapProxyApp
         public string ResponseHeaders { get; set; }
         public string ResponseBody { get; set; }
         public DateTime Timestamp { get; set; } = DateTime.Now;
-        public long ContentLength { get; set; }
+        
+        public long ContentLength => string.IsNullOrEmpty(ResponseBody) ? 0 : System.Text.Encoding.UTF8.GetByteCount(ResponseBody);
 
         public string FormattedLength
         {
