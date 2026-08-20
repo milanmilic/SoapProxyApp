@@ -1,0 +1,33 @@
+<SyntaxDefinition name="DarkJSON" extensions=".json" xmlns="http://icsharpcode.net/framework/avalonedit">
+    <Color name="String" foreground="#9CDCFE" exampleText="&quot;value&quot;" />
+    <Color name="Number" foreground="#B5CEA8" exampleText="3.14" />
+    <Color name="Boolean" foreground="#569CD6" exampleText="true" />
+    <Color name="Null" foreground="#569CD6" exampleText="null" />
+    <Color name="PropertyName" foreground="#4EC9B0" exampleText="&quot;property&quot;:" />
+    <Color name="Punctuation" foreground="#D4D4D4" exampleText="{ } [ ] , :" />
+    
+    <RuleSet>
+        <Rule color="PropertyName">
+            &quot; [^&quot;\\]* &quot; \s* (?=:)
+        </Rule>
+        <Span color="String" multiline="true">
+            <Begin>&quot;</Begin>
+            <End>&quot;</End>
+            <RuleSet>
+                <Rule match="\\." />
+            </RuleSet>
+        </Span>
+        <Rule color="Number">
+            \b0[xX][0-9a-fA-F]+|(\b\d+(\.[0-9]+)?|\.[0-9]+)([eE][+-]?[0-9]+)?
+        </Rule>
+        <Rule color="Boolean">
+            \b(true|false)\b
+        </Rule>
+        <Rule color="Null">
+            \b(null)\b
+        </Rule>
+        <Rule color="Punctuation">
+            [{},:\[\]]
+        </Rule>
+    </RuleSet>
+</SyntaxDefinition>
