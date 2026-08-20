@@ -6,25 +6,26 @@ Windows WPF aplikacija za presretanje SOAP mrežnog saobraćaja.
 - Hvatanje HTTP/HTTPS request i response paketa
 - Prikaz zaglavlja (Headers) i tela (Body)
 - Automatska konverzija iz SOAP XML formata u JSON format za lakše čitanje
+- Izvoz pojedinačnih zahteva i odgovora u tekstualne/XML/JSON fajlove
+- Brisanje svih sačuvanih sesija jednim klikom
 
-## Instalacija
-Aplikacija je kreirana koristeći .NET 8 (ili 9) WPF. 
-1. Otvoriti `SoapProxyApp.sln` ili folder u Visual Studio-u.
-2. Build projekta (automatski će skinuti NuGet pakete).
+## Instalacija & Korišćenje (Za korisnike)
+Ova aplikacija je **Portable** (ne zahteva instalaciju ni instaliran .NET).
+
+1. Preuzmi fajl `SoapProxyApp.exe` iz sekcije *Releases*.
+2. Dvoklikni na fajl da ga pokreneš.
+3. Klikni na dugme **Start Proxy**.
+4. Klikni na dugme **Export Cert**. Aplikacija će sačuvati sertifikat na Desktop.
+5. Dvoklikni na sertifikat na Desktopu, klikni *Install Certificate*.
+6. Obavezno izaberi **Local Machine** -> *Place all certificates in the following store* -> *Browse* -> **Trusted Root Certification Authorities**.
+7. Započni slanje zahteva iz tvoje web aplikacije (ona će sada automatski rutirati saobraćaj kroz ovaj proxy).
+
+## Za Developere
+Aplikacija je kreirana koristeći C# (.NET 10) i WPF. 
+1. Otvoriti folder u Visual Studio-u.
+2. Build projekta (automatski će skinuti NuGet pakete iz `nuget.config`).
 3. Pokrenuti aplikaciju.
-
-## Korišćenje
-1. Kliknuti na dugme `Start Proxy` u aplikaciji.
-2. Podesiti vaš SOAP klijent da koristi proxy: `127.0.0.1:8888`.
-3. Svi zahtevi će se pojaviti u listi sa leve strane. Klikom na zahtev, možete videti detalje sa desne strane, uključujući i JSON tab.
 
 ## Zavisnosti
 - Titanium.Web.Proxy
 - Newtonsoft.Json
-## Installation & Usage
-
-1. Download \SoapProxyApp.exe\ from the latest release.
-2. Run the application (no installation required).
-3. Click **Start Proxy**.
-4. Click **Export Cert** and follow the instructions to install the proxy certificate to your **Local Machine -> Trusted Root Certification Authorities** store. This is required for your local WCF/Web apps to trust the proxy.
-5. Your web applications will now automatically route traffic through this proxy and you can inspect SOAP/JSON payloads.
