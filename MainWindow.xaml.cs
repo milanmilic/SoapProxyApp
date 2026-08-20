@@ -203,6 +203,24 @@ namespace SoapProxyApp
             });
         }
 
+        private string GetSafeSessionName(CapturedSession s, string suffix)
+        {
+            string app = string.IsNullOrWhiteSpace(s.ProcessName) ? "UnknownApp" : s.ProcessName;
+            string action = "NoAction";
+            if (!string.IsNullOrWhiteSpace(s.SoapAction))
+            {
+                action = s.SoapAction.Trim('\"');
+                if (action.Contains("/"))
+                    action = action.Substring(action.LastIndexOf('/') + 1);
+            }
+            string safeName = $"{app}_{action}_{s.Timestamp:HHmmss}_{suffix}";
+            foreach (char c in Path.GetInvalidFileNameChars())
+            {
+                safeName = safeName.Replace(c, '_');
+            }
+            return safeName + ".xml";
+        }
+
         private void MenuCompareReq_Click(object sender, RoutedEventArgs e)
         {
             if (LstSessions.SelectedItems.Count != 2)
@@ -212,7 +230,7 @@ namespace SoapProxyApp
             }
             var s1 = (CapturedSession)LstSessions.SelectedItems[0];
             var s2 = (CapturedSession)LstSessions.SelectedItems[1];
-            CompareDiff(FormatXml(s1.RequestBody), FormatXml(s2.RequestBody));
+            CompareDiff(FormatXml(s1.RequestBody), FormatXml(s2.RequestBody), GetSafeSessionName(s1, "Req1"), GetSafeSessionName(s2, "Req2"));
         }
 
         private void MenuCompareRes_Click(object sender, RoutedEventArgs e)
@@ -224,15 +242,15 @@ namespace SoapProxyApp
             }
             var s1 = (CapturedSession)LstSessions.SelectedItems[0];
             var s2 = (CapturedSession)LstSessions.SelectedItems[1];
-            CompareDiff(FormatXml(s1.ResponseBody), FormatXml(s2.ResponseBody));
+            CompareDiff(FormatXml(s1.ResponseBody), FormatXml(s2.ResponseBody), GetSafeSessionName(s1, "Res1"), GetSafeSessionName(s2, "Res2"));
         }
 
-        private void CompareDiff(string text1, string text2)
+        private void CompareDiff(string text1, string text2, string name1, string name2)
         {
             try
             {
-                string path1 = Path.Combine(Path.GetTempPath(), "session1_compare.txt");
-                string path2 = Path.Combine(Path.GetTempPath(), "session2_compare.txt");
+                string path1 = Path.Combine(Path.GetTempPath(), name1);
+                string path2 = Path.Combine(Path.GetTempPath(), name2);
                 File.WriteAllText(path1, text1 ?? "");
                 File.WriteAllText(path2, text2 ?? "");
 
