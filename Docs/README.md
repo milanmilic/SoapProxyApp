@@ -21,3 +21,10 @@ Aplikacija je kreirana koristeći .NET 8 (ili 9) WPF.
 ## Zavisnosti
 - Titanium.Web.Proxy
 - Newtonsoft.Json
+## Installation & Usage
+
+1. Download \SoapProxyApp.exe\ from the latest release.
+2. Run the application (no installation required).
+3. Click **Start Proxy**.
+4. Click **Export Cert** and follow the instructions to install the proxy certificate to your **Local Machine -> Trusted Root Certification Authorities** store. This is required for your local WCF/Web apps to trust the proxy.
+5. Your web applications will now automatically route traffic through this proxy and you can inspect SOAP/JSON payloads.
