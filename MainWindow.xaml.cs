@@ -4,10 +4,12 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Xml;
 using System.Xml.Linq;
+using System.Windows.Media.Imaging;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 using ICSharpCode.AvalonEdit.Highlighting;
 using ICSharpCode.AvalonEdit.Highlighting.Xshd;
+using ICSharpCode.AvalonEdit.Folding;
 
 namespace SoapProxyApp
 {
@@ -16,8 +18,18 @@ namespace SoapProxyApp
         private ProxyEngine proxyEngine;
         public ObservableCollection<CapturedSession> Sessions { get; set; }
         private bool isDarkMode = false;
-        private IHighlightingDefinition lightXml, darkXml;
-        private IHighlightingDefinition lightJson, darkJson;
+        private IHighlightingDefinition lightXml;
+        private IHighlightingDefinition darkXml;
+        private IHighlightingDefinition lightJson;
+        private IHighlightingDefinition darkJson;
+
+        private FoldingManager reqXmlFoldingManager;
+        private FoldingManager resXmlFoldingManager;
+        private FoldingManager reqJsonFoldingManager;
+        private FoldingManager resJsonFoldingManager;
+
+        private XmlFoldingStrategy xmlFoldingStrategy = new XmlFoldingStrategy();
+        private BraceFoldingStrategy jsonFoldingStrategy = new BraceFoldingStrategy();
 
         public MainWindow()
         {
@@ -34,6 +46,11 @@ namespace SoapProxyApp
             TxtReqJson.SyntaxHighlighting = lightJson;
             TxtResXmlFormatted.SyntaxHighlighting = lightXml;
             TxtResJson.SyntaxHighlighting = lightJson;
+
+            reqXmlFoldingManager = FoldingManager.Install(TxtReqXmlFormatted.TextArea);
+            resXmlFoldingManager = FoldingManager.Install(TxtResXmlFormatted.TextArea);
+            reqJsonFoldingManager = FoldingManager.Install(TxtReqJson.TextArea);
+            resJsonFoldingManager = FoldingManager.Install(TxtResJson.TextArea);
         }
 
         private void LoadSyntaxDefinitions()
@@ -278,9 +295,15 @@ namespace SoapProxyApp
             if (LstSessions.SelectedItem is CapturedSession session && ReqTabs != null)
             {
                 if (ReqTabs.SelectedIndex == 2 && string.IsNullOrEmpty(TxtReqXmlFormatted.Text))
+                {
                     TxtReqXmlFormatted.Text = FormatXml(session.RequestBody);
+                    xmlFoldingStrategy.UpdateFoldings(reqXmlFoldingManager, TxtReqXmlFormatted.Document);
+                }
                 else if (ReqTabs.SelectedIndex == 3 && string.IsNullOrEmpty(TxtReqJson.Text))
+                {
                     TxtReqJson.Text = ConvertXmlToJson(session.RequestBody);
+                    jsonFoldingStrategy.UpdateFoldings(reqJsonFoldingManager, TxtReqJson.Document);
+                }
             }
         }
 
@@ -289,9 +312,15 @@ namespace SoapProxyApp
             if (LstSessions.SelectedItem is CapturedSession session && ResTabs != null)
             {
                 if (ResTabs.SelectedIndex == 2 && string.IsNullOrEmpty(TxtResXmlFormatted.Text))
+                {
                     TxtResXmlFormatted.Text = FormatXml(session.ResponseBody);
+                    xmlFoldingStrategy.UpdateFoldings(resXmlFoldingManager, TxtResXmlFormatted.Document);
+                }
                 else if (ResTabs.SelectedIndex == 3 && string.IsNullOrEmpty(TxtResJson.Text))
+                {
                     TxtResJson.Text = ConvertXmlToJson(session.ResponseBody);
+                    jsonFoldingStrategy.UpdateFoldings(resJsonFoldingManager, TxtResJson.Document);
+                }
             }
         }
 
