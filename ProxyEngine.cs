@@ -24,7 +24,7 @@ namespace SoapProxyApp
             proxyServer.BeforeRequest += OnRequest;
             proxyServer.BeforeResponse += OnResponse;
 
-            // Proxy na zadatom portu
+            // Set proxy on specified port
             explicitEndPoint = new ExplicitProxyEndPoint(IPAddress.Any, port, true);
             proxyServer.AddEndPoint(explicitEndPoint);
             proxyServer.Start();
@@ -49,7 +49,7 @@ namespace SoapProxyApp
 
         private async Task OnRequest(object sender, SessionEventArgs e)
         {
-            // Čitamo request body
+            // Read request body
             if (e.HttpClient.Request.HasBody)
             {
                 await e.GetRequestBodyAsString();
@@ -58,7 +58,7 @@ namespace SoapProxyApp
 
         private async Task OnResponse(object sender, SessionEventArgs e)
         {
-            // Kada se i response završi, pročitamo ga i pakujemo u naš model
+            // When response is complete, read it and package into our model
             if (e.HttpClient.Response.HasBody)
             {
                 await e.GetResponseBodyAsString();
@@ -75,7 +75,7 @@ namespace SoapProxyApp
                 ResponseBody = e.HttpClient.Response.IsBodyRead ? e.HttpClient.Response.BodyString : ""
             };
 
-            // Šaljemo gotov session UI-ju
+            // Send captured session to the UI
             OnSessionCompleted?.Invoke(this, session);
         }
     }

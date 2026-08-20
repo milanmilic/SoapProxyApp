@@ -28,7 +28,7 @@ namespace SoapProxyApp
         {
             if (!int.TryParse(TxtPort.Text, out int port))
             {
-                MessageBox.Show("Molimo unesite validan broj porta.", "Greška", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Please enter a valid port number.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
@@ -72,7 +72,7 @@ namespace SoapProxyApp
                 var cert = proxyEngine.GetRootCertificate();
                 if (cert == null)
                 {
-                    MessageBox.Show("Moraš prvo kliknuti 'Start Proxy' da bi sertifikat bio generisan.", "Upozorenje", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show("You must click 'Start Proxy' first to generate the certificate.", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
@@ -84,18 +84,18 @@ namespace SoapProxyApp
                         store.Add(cert);
                         store.Close();
                     }
-                    MessageBox.Show("Sertifikat je uspešno instaliran direktno u Local Machine -> Trusted Root Certification Authorities!\n\nTvoje web aplikacije sada automatski veruju proxy-ju.", "Uspeh", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessageBox.Show("Certificate successfully installed directly into Local Machine -> Trusted Root Certification Authorities!\n\nYour web applications now automatically trust the proxy.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 catch (System.Security.Cryptography.CryptographicException)
                 {
                     string path = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "ProxyCert.cer");
                     System.IO.File.WriteAllBytes(path, cert.Export(System.Security.Cryptography.X509Certificates.X509ContentType.Cert));
-                    MessageBox.Show($"Nemaš administratorska ovlašćenja za automatsku instalaciju.\n\nIli pokreni ovu aplikaciju kao Administrator (desni klik -> Run as Administrator) pa klikni ponovo, ILI ručno instaliraj fajl koji ti je upravo sačuvan na Desktopu pod imenom 'ProxyCert.cer'.", "Zahteva Administratora", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show($"You don't have administrator privileges for automatic installation.\n\nEither run this application as Administrator (Right click -> Run as Administrator) and click again, OR manually install the file that was just saved to your Desktop under the name 'ProxyCert.cer'.", "Administrator Required", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Greška: {ex.Message}", "Greška", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -178,7 +178,7 @@ namespace SoapProxyApp
 
             if (string.IsNullOrWhiteSpace(content))
             {
-                MessageBox.Show("Nema sadržaja za exportovanje.", "Upozorenje", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("No content to export.", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -193,11 +193,11 @@ namespace SoapProxyApp
                 try
                 {
                     System.IO.File.WriteAllText(sfd.FileName, content);
-                    MessageBox.Show("Fajl uspešno sačuvan!", "Uspeh", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessageBox.Show("File successfully saved!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Greška pri čuvanju: {ex.Message}", "Greška", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show($"Error saving file: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
@@ -234,7 +234,7 @@ namespace SoapProxyApp
             }
             catch (Exception)
             {
-                return "Sadržaj nije validan XML.\n\n" + xml;
+                return "Content is not valid XML.\n\n" + xml;
             }
         }
 
@@ -249,7 +249,7 @@ namespace SoapProxyApp
             }
             catch (Exception ex)
             {
-                return $"Nije moguće parsirati sadržaj kao XML u JSON.\nGreška: {ex.Message}\n\nRAW:\n{xml}";
+                return $"Unable to parse content as XML to JSON.\nError: {ex.Message}\n\nRAW:\n{xml}";
             }
         }
 
