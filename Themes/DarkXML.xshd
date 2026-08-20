@@ -1,53 +1,20 @@
-<SyntaxDefinition name="DarkXML" extensions=".xml" xmlns="http://icsharpcode.net/framework/avalonedit">
-    <Color name="Comment" foreground="#608B4E" exampleText="&lt;!-- comment --&gt;" />
-    <Color name="CData" foreground="#D69D85" exampleText="&lt;![CDATA[data]]&gt;" />
-    <Color name="DocType" foreground="#569CD6" exampleText="&lt;!DOCTYPE rootElement&gt;" />
-    <Color name="XmlDeclaration" foreground="#569CD6" exampleText="&lt;?xml version='1.0'?&gt;" />
-    <Color name="XmlTag" foreground="#D4D4D4" exampleText="&lt; &gt;" />
-    <Color name="TagName" foreground="#4EC9B0" exampleText="tag" />
-    <Color name="AttributeName" foreground="#9CDCFE" exampleText="attribute" />
-    <Color name="AttributeValue" foreground="#569CD6" exampleText="&quot;value&quot;" />
-    <Color name="Entity" foreground="#DCDCAA" exampleText="&amp;amp;" />
-    <Color name="BrokenEntity" foreground="#FF8080" exampleText="&amp;b=2" />
-    
+<?xml version="1.0"?>
+<SyntaxDefinition name="DarkXML" extensions=".xml" xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
+    <Color name="Name" foreground="#4EC9B0" />
+    <Color name="Value" foreground="#FF7F7F" />
+    <Color name="Link" foreground="#569CD6" />
+    <Color name="Punctuation" foreground="#D4D4D4" />
     <RuleSet>
-        <Span color="Comment" multiline="true">
+        <Span color="Value" multiline="true">
             <Begin>&lt;!--</Begin>
             <End>--&gt;</End>
         </Span>
-        <Span color="CData" multiline="true">
-            <Begin>&lt;!\[CDATA\[</Begin>
-            <End>\]\]&gt;</End>
-        </Span>
-        <Span color="DocType" multiline="true">
-            <Begin>&lt;!DOCTYPE</Begin>
-            <End>&gt;</End>
-        </Span>
-        <Span color="XmlDeclaration" multiline="true">
-            <Begin>&lt;\?</Begin>
-            <End>\?&gt;</End>
-        </Span>
-        <Span color="XmlTag" multiline="true">
-            <Begin>&lt;</Begin>
-            <End>&gt;</End>
-            <RuleSet>
-                <Span color="AttributeValue" multiline="true" ruleSet="EntitySet">
-                    <Begin>"</Begin>
-                    <End>"|(?=&lt;)</End>
-                </Span>
-                <Span color="AttributeValue" multiline="true" ruleSet="EntitySet">
-                    <Begin>'</Begin>
-                    <End>'|(?=&lt;)</End>
-                </Span>
-                <Rule color="AttributeName">[\d\w_\-\.:]+(?=(\s*=))</Rule>
-                <Rule color="TagName">/?[\d\w_\-\.:]+</Rule>
-            </RuleSet>
-        </Span>
-        <Import ruleSet="EntitySet"/>
-    </RuleSet>
-    
-    <RuleSet name="EntitySet">
-        <Rule color="Entity">&amp;[\w\d\#]+;</Rule>
-        <Rule color="BrokenEntity">&amp;[\w\d\#]*</Rule>
+        <Rule color="Link">&quot;https?://[^&quot;]*&quot;</Rule>
+        <Rule color="Value">&quot;[^&quot;]*&quot;</Rule>
+        <Rule color="Name">(?&lt;=&lt;/?)[A-Za-z0-9_:\.\-]+</Rule>
+        <Rule color="Name">[A-Za-z0-9_:\.\-]+(?=\s*=)</Rule>
+        <Rule color="Value">(?&lt;=&gt;)[^&lt;&gt;]+(?=&lt;)</Rule>
+        <Rule color="Punctuation">[&lt;&gt;=/?]+</Rule>
     </RuleSet>
 </SyntaxDefinition>
+

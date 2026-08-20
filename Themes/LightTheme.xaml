@@ -8,6 +8,7 @@
     <SolidColorBrush x:Key="AccentColor" Color="#007ACC"/>
     <SolidColorBrush x:Key="ItemBg" Color="White"/>
     <SolidColorBrush x:Key="ItemSelectedBg" Color="#CCE8FF"/>
+    <SolidColorBrush x:Key="ItemText" Color="#005A9E"/>
     <!-- AvalonEdit Default Editor Colors -->
     <SolidColorBrush x:Key="EditorBg" Color="White"/>
     <SolidColorBrush x:Key="EditorFg" Color="Black"/>
