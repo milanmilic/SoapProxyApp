@@ -2,6 +2,8 @@ using System;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
+using System.IO;
+using System.Diagnostics;
 using System.Xml;
 using System.Xml.Linq;
 using System.Windows.Media.Imaging;
@@ -199,6 +201,75 @@ namespace SoapProxyApp
                 // Scroll to bottom automatically
                 LstSessions.ScrollIntoView(session);
             });
+        }
+
+        private void MenuCompareReq_Click(object sender, RoutedEventArgs e)
+        {
+            if (LstSessions.SelectedItems.Count != 2)
+            {
+                MessageBox.Show("Please select exactly TWO requests to compare.", "Compare", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+            var s1 = (CapturedSession)LstSessions.SelectedItems[0];
+            var s2 = (CapturedSession)LstSessions.SelectedItems[1];
+            CompareDiff(FormatXml(s1.RequestBody), FormatXml(s2.RequestBody));
+        }
+
+        private void MenuCompareRes_Click(object sender, RoutedEventArgs e)
+        {
+            if (LstSessions.SelectedItems.Count != 2)
+            {
+                MessageBox.Show("Please select exactly TWO requests to compare.", "Compare", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+            var s1 = (CapturedSession)LstSessions.SelectedItems[0];
+            var s2 = (CapturedSession)LstSessions.SelectedItems[1];
+            CompareDiff(FormatXml(s1.ResponseBody), FormatXml(s2.ResponseBody));
+        }
+
+        private void CompareDiff(string text1, string text2)
+        {
+            try
+            {
+                string path1 = Path.Combine(Path.GetTempPath(), "session1_compare.txt");
+                string path2 = Path.Combine(Path.GetTempPath(), "session2_compare.txt");
+                File.WriteAllText(path1, text1 ?? "");
+                File.WriteAllText(path2, text2 ?? "");
+
+                // Try VS Code
+                try
+                {
+                    Process.Start(new ProcessStartInfo
+                    {
+                        FileName = "code",
+                        Arguments = $"-d \"{path1}\" \"{path2}\"",
+                        UseShellExecute = true,
+                        CreateNoWindow = true
+                    });
+                    return;
+                }
+                catch { }
+
+                // Try WinMerge
+                try
+                {
+                    Process.Start(new ProcessStartInfo
+                    {
+                        FileName = "winmergeu",
+                        Arguments = $"\"{path1}\" \"{path2}\"",
+                        UseShellExecute = true,
+                        CreateNoWindow = true
+                    });
+                    return;
+                }
+                catch { }
+
+                MessageBox.Show("Could not find 'code' (VS Code) or 'winmergeu' (WinMerge) in your system PATH.\nPlease ensure you have a diff tool installed and added to PATH.", "Compare Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error launching diff tool: {ex.Message}", "Compare Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void LstSessions_SelectionChanged(object sender, SelectionChangedEventArgs e)
