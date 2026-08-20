@@ -16,10 +16,9 @@ This application is **Portable** and does not require an installation wizard or 
 1. Download the `SoapProxyApp.exe` file from the *Releases* section.
 2. Double-click the executable to launch it.
 3. Click the **Start Proxy** button.
-4. Click the **Export Cert** button. The app will save its root certificate to your Desktop.
-5. Double-click the generated certificate on your Desktop and click **Install Certificate**.
-6. Choose **Local Machine**, select *Place all certificates in the following store*, click *Browse*, and select **Trusted Root Certification Authorities**.
-7. Start making requests from your WCF or Web application (traffic will automatically route through the proxy and appear in the list).
+4. Click the **Install Cert** button. (Note: Run the app as Administrator for automatic installation).
+5. If running as Administrator, the certificate will be automatically installed to **Local Machine -> Trusted Root Certification Authorities**. If not, it will be saved to your Desktop for manual installation.
+6. Start making requests from your WCF or Web application (traffic will automatically route through the proxy and appear in the list).
 
 ## For Developers
 The application is built using C# (.NET 10) and WPF.

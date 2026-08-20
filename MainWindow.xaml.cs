@@ -70,15 +70,27 @@ namespace SoapProxyApp
             try
             {
                 var cert = proxyEngine.GetRootCertificate();
-                if (cert != null)
+                if (cert == null)
+                {
+                    MessageBox.Show("Moraš prvo kliknuti 'Start Proxy' da bi sertifikat bio generisan.", "Upozorenje", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                try
+                {
+                    using (System.Security.Cryptography.X509Certificates.X509Store store = new System.Security.Cryptography.X509Certificates.X509Store(System.Security.Cryptography.X509Certificates.StoreName.Root, System.Security.Cryptography.X509Certificates.StoreLocation.LocalMachine))
+                    {
+                        store.Open(System.Security.Cryptography.X509Certificates.OpenFlags.ReadWrite);
+                        store.Add(cert);
+                        store.Close();
+                    }
+                    MessageBox.Show("Sertifikat je uspešno instaliran direktno u Local Machine -> Trusted Root Certification Authorities!\n\nTvoje web aplikacije sada automatski veruju proxy-ju.", "Uspeh", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                catch (System.Security.Cryptography.CryptographicException)
                 {
                     string path = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "ProxyCert.cer");
                     System.IO.File.WriteAllBytes(path, cert.Export(System.Security.Cryptography.X509Certificates.X509ContentType.Cert));
-                    MessageBox.Show($"Sertifikat je sačuvan na tvom Desktopu pod imenom 'ProxyCert.cer'.\n\nPošto pokrećeš web aplikaciju (verovatno preko IIS-a), ona traži sertifikat na nivou celog računara (Local Machine), a ne samo tvog korisnika.\n\nZato uradi sledeće:\n1. Idi na Desktop i dvoklikni 'ProxyCert.cer'.\n2. Klikni na 'Install Certificate'.\n3. Odaberi 'Local Machine' i klikni Next (tražiće admina).\n4. Odaberi opciju 'Place all certificates in the following store'.\n5. Klikni 'Browse' i izaberi 'Trusted Root Certification Authorities'.\n6. Next -> Finish.\n\nNakon ovoga tvoja aplikacija će raditi savršeno!", "Instalacija Sertifikata", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-                else
-                {
-                    MessageBox.Show("Moraš prvo kliknuti 'Start Proxy' da bi sertifikat bio generisan.", "Upozorenje", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show($"Nemaš administratorska ovlašćenja za automatsku instalaciju.\n\nIli pokreni ovu aplikaciju kao Administrator (desni klik -> Run as Administrator) pa klikni ponovo, ILI ručno instaliraj fajl koji ti je upravo sačuvan na Desktopu pod imenom 'ProxyCert.cer'.", "Zahteva Administratora", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
             }
             catch (Exception ex)
