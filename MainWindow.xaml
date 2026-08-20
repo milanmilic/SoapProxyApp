@@ -70,7 +70,7 @@
                 </ListBox.ItemContainerStyle>
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <Border x:Name="ItemBorder" Margin="0,1" Padding="3,2" CornerRadius="3" Background="Transparent">
+                        <Border x:Name="ItemBorder" Margin="0,1" Padding="3,2" CornerRadius="3" Background="Transparent" BorderThickness="2" BorderBrush="Transparent">
                             <StackPanel>
                                 <TextBlock Text="{Binding Url}" FontWeight="SemiBold" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource ItemText}"/>
                                 <TextBlock Foreground="{DynamicResource TextFg}" Opacity="0.7" FontSize="11" Margin="0,1,0,0">
@@ -93,6 +93,10 @@
                             </DataTrigger>
                             <DataTrigger Binding="{Binding StatusCategory}" Value="Warning">
                                 <Setter TargetName="ItemBorder" Property="Background" Value="{DynamicResource WarningBg}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
+                                <Setter TargetName="ItemBorder" Property="BorderBrush" Value="{DynamicResource AccentColor}" />
+                                <Setter TargetName="ItemBorder" Property="Background" Value="{DynamicResource ItemSelectedBg}" />
                             </DataTrigger>
                         </DataTemplate.Triggers>
                     </DataTemplate>
