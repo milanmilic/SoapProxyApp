@@ -70,10 +70,10 @@
                 </ListBox.ItemContainerStyle>
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <Border x:Name="ItemBorder" Margin="0,2,0,2" Padding="5" CornerRadius="3" Background="Transparent">
+                        <Border x:Name="ItemBorder" Margin="0,1" Padding="3,2" CornerRadius="3" Background="Transparent">
                             <StackPanel>
-                                <TextBlock Text="{Binding Url}" FontWeight="SemiBold" TextWrapping="Wrap" Foreground="{DynamicResource ItemText}"/>
-                                <TextBlock Foreground="{DynamicResource TextFg}" Opacity="0.7" FontSize="11" Margin="0,2,0,0">
+                                <TextBlock Text="{Binding Url}" FontWeight="SemiBold" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource ItemText}"/>
+                                <TextBlock Foreground="{DynamicResource TextFg}" Opacity="0.7" FontSize="11" Margin="0,1,0,0">
                                     <Run Text="{Binding Timestamp, StringFormat='HH:mm:ss'}" />
                                     <Run Text=" | Status: " />
                                     <Run Text="{Binding StatusCode}" FontWeight="Bold" />

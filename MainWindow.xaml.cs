@@ -196,6 +196,8 @@ namespace SoapProxyApp
             Dispatcher.Invoke(() =>
             {
                 Sessions.Add(session);
+                // Scroll to bottom automatically
+                LstSessions.ScrollIntoView(session);
             });
         }
 
