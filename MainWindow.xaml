@@ -1,0 +1,129 @@
+<Window x:Class="SoapProxyApp.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="SOAP Proxy App" Height="800" Width="1200" Background="#F4F4F9">
+    
+    <Window.Resources>
+        <Style TargetType="TextBox">
+            <Setter Property="FontFamily" Value="Consolas"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Background" Value="#FAFAFA"/>
+            <Setter Property="IsReadOnly" Value="True"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="VerticalScrollBarVisibility" Value="Auto"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="5"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Top Bar -->
+        <Border Grid.Row="0" Background="White" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
+            <StackPanel Orientation="Horizontal" Margin="10,0" VerticalAlignment="Center">
+                <TextBlock Text="Port:" VerticalAlignment="Center" Margin="0,0,5,0" FontWeight="Bold"/>
+                <TextBox Name="TxtPort" Text="8899" Width="60" Padding="2" Background="White" IsReadOnly="False" BorderThickness="1" BorderBrush="#CCC" Margin="0,0,15,0" VerticalAlignment="Center"/>
+                <Button Name="BtnStart" Content="Start Proxy" Width="100" Height="30" Margin="0,0,10,0" Click="BtnStart_Click" FontWeight="Bold"/>
+                <Button Name="BtnStop" Content="Stop Proxy" Width="100" Height="30" IsEnabled="False" Click="BtnStop_Click"/>
+                <Button Name="BtnClear" Content="🗑 Clear All" Width="90" Height="30" Margin="10,0,0,0" Click="BtnClear_Click" Background="#FF9800" Foreground="White" BorderThickness="0" FontWeight="Bold"/>
+                <Button Name="BtnExportCert" Content="Export Cert" Width="100" Height="30" Margin="10,0,0,0" Click="BtnExportCert_Click"/>
+                <TextBlock Name="TxtStatus" Text="Proxy is stopped." VerticalAlignment="Center" Margin="20,0,0,0" FontWeight="Bold" Foreground="#D32F2F"/>
+            </StackPanel>
+        </Border>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="400"/>
+                <ColumnDefinition Width="5"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Left Column: Sessions List -->
+            <ListBox Name="LstSessions" Grid.Column="0" Margin="10" SelectionChanged="LstSessions_SelectionChanged" BorderBrush="#CCC" BorderThickness="1">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Margin="0,4,0,4">
+                            <TextBlock Text="{Binding Url}" FontWeight="SemiBold" TextWrapping="Wrap" Foreground="#005A9E"/>
+                            <TextBlock Foreground="#666666" FontSize="11" Margin="0,2,0,0">
+                                <Run Text="{Binding Timestamp, StringFormat='HH:mm:ss'}" />
+                                <Run Text=" | Status: " />
+                                <Run Text="{Binding StatusCode}" FontWeight="Bold" />
+                                <Run Text=" | Method: " />
+                                <Run Text="{Binding Method}" />
+                            </TextBlock>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+
+            <!-- Vertical Splitter -->
+            <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" Background="#E0E0E0" ShowsPreview="True"/>
+
+            <!-- Right Column: Details -->
+            <Grid Grid.Column="2" Margin="5,10,10,10">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="5"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Request Details -->
+                <GroupBox Header="REQUEST" Grid.Row="0" FontWeight="Bold" Foreground="#333">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Button Name="BtnExportReq" Content="💾 Export" Grid.Row="0" HorizontalAlignment="Right" Padding="15,3" Margin="0,0,0,2" Click="BtnExportReq_Click" Background="#2196F3" Foreground="White" BorderThickness="0" FontWeight="Bold" Cursor="Hand"/>
+                        <TabControl Name="ReqTabs" Grid.Row="1" Margin="0" FontWeight="Normal" SelectionChanged="ReqTabs_SelectionChanged">
+                            <TabItem Header="Headers">
+                                <TextBox Name="TxtReqHeaders" />
+                            </TabItem>
+                            <TabItem Header="Raw">
+                                <TextBox Name="TxtReqRaw" />
+                            </TabItem>
+                            <TabItem Header="Formatted XML">
+                                <TextBox Name="TxtReqXmlFormatted" />
+                            </TabItem>
+                            <TabItem Header="JSON">
+                                <TextBox Name="TxtReqJson" />
+                            </TabItem>
+                        </TabControl>
+                    </Grid>
+                </GroupBox>
+
+                <!-- Horizontal Splitter -->
+                <GridSplitter Grid.Row="1" Height="5" HorizontalAlignment="Stretch" Background="#E0E0E0" ShowsPreview="True"/>
+
+                <!-- Response Details -->
+                <GroupBox Header="RESPONSE" Grid.Row="2" FontWeight="Bold" Foreground="#333">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Button Name="BtnExportRes" Content="💾 Export" Grid.Row="0" HorizontalAlignment="Right" Padding="15,3" Margin="0,0,0,2" Click="BtnExportRes_Click" Background="#2196F3" Foreground="White" BorderThickness="0" FontWeight="Bold" Cursor="Hand"/>
+                        <TabControl Name="ResTabs" Grid.Row="1" Margin="0" FontWeight="Normal" SelectionChanged="ResTabs_SelectionChanged">
+                            <TabItem Header="Headers">
+                                <TextBox Name="TxtResHeaders" />
+                            </TabItem>
+                            <TabItem Header="Raw">
+                                <TextBox Name="TxtResRaw" />
+                            </TabItem>
+                            <TabItem Header="Formatted XML">
+                                <TextBox Name="TxtResXmlFormatted" />
+                            </TabItem>
+                            <TabItem Header="JSON">
+                                <TextBox Name="TxtResJson" />
+                            </TabItem>
+                        </TabControl>
+                    </Grid>
+                </GroupBox>
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>
