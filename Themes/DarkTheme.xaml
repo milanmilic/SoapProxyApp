@@ -9,6 +9,11 @@
     <SolidColorBrush x:Key="ItemBg" Color="#252526"/>
     <SolidColorBrush x:Key="ItemSelectedBg" Color="#3F3F46"/>
     <SolidColorBrush x:Key="ItemText" Color="#4DAAFB"/>
+    <!-- Status Colors -->
+    <SolidColorBrush x:Key="SuccessBg" Color="#1E3B20"/> <!-- Dark Pale Green -->
+    <SolidColorBrush x:Key="ErrorBg" Color="#4A1C1C"/>   <!-- Dark Pale Red -->
+    <SolidColorBrush x:Key="WarningBg" Color="#333333"/> <!-- Dark Gray/Neutral -->
+    
     <!-- AvalonEdit Default Editor Colors -->
     <SolidColorBrush x:Key="EditorBg" Color="#1E1E1E"/>
     <SolidColorBrush x:Key="EditorFg" Color="#D4D4D4"/>

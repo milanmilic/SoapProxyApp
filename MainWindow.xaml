@@ -70,16 +70,31 @@
                 </ListBox.ItemContainerStyle>
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <StackPanel Margin="0,4,0,4">
-                            <TextBlock Text="{Binding Url}" FontWeight="SemiBold" TextWrapping="Wrap" Foreground="{DynamicResource ItemText}"/>
-                            <TextBlock Foreground="{DynamicResource TextFg}" Opacity="0.7" FontSize="11" Margin="0,2,0,0">
-                                <Run Text="{Binding Timestamp, StringFormat='HH:mm:ss'}" />
-                                <Run Text=" | Status: " />
-                                <Run Text="{Binding StatusCode}" FontWeight="Bold" />
-                                <Run Text=" | Method: " />
-                                <Run Text="{Binding Method}" />
-                            </TextBlock>
-                        </StackPanel>
+                        <Border x:Name="ItemBorder" Margin="0,2,0,2" Padding="5" CornerRadius="3" Background="Transparent">
+                            <StackPanel>
+                                <TextBlock Text="{Binding Url}" FontWeight="SemiBold" TextWrapping="Wrap" Foreground="{DynamicResource ItemText}"/>
+                                <TextBlock Foreground="{DynamicResource TextFg}" Opacity="0.7" FontSize="11" Margin="0,2,0,0">
+                                    <Run Text="{Binding Timestamp, StringFormat='HH:mm:ss'}" />
+                                    <Run Text=" | Status: " />
+                                    <Run Text="{Binding StatusCode}" FontWeight="Bold" />
+                                    <Run Text=" | Method: " />
+                                    <Run Text="{Binding Method}" />
+                                    <Run Text=" | Length: " />
+                                    <Run Text="{Binding FormattedLength}" />
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+                        <DataTemplate.Triggers>
+                            <DataTrigger Binding="{Binding StatusCategory}" Value="Success">
+                                <Setter TargetName="ItemBorder" Property="Background" Value="{DynamicResource SuccessBg}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding StatusCategory}" Value="Error">
+                                <Setter TargetName="ItemBorder" Property="Background" Value="{DynamicResource ErrorBg}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding StatusCategory}" Value="Warning">
+                                <Setter TargetName="ItemBorder" Property="Background" Value="{DynamicResource WarningBg}" />
+                            </DataTrigger>
+                        </DataTemplate.Triggers>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>

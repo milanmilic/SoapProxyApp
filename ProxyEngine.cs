@@ -72,7 +72,8 @@ namespace SoapProxyApp
                 RequestHeaders = string.Join(Environment.NewLine, e.HttpClient.Request.Headers.Select(h => $"{h.Name}: {h.Value}")),
                 RequestBody = e.HttpClient.Request.IsBodyRead ? e.HttpClient.Request.BodyString : "",
                 ResponseHeaders = string.Join(Environment.NewLine, e.HttpClient.Response.Headers.Select(h => $"{h.Name}: {h.Value}")),
-                ResponseBody = e.HttpClient.Response.IsBodyRead ? e.HttpClient.Response.BodyString : ""
+                ResponseBody = e.HttpClient.Response.IsBodyRead ? e.HttpClient.Response.BodyString : "",
+                ContentLength = e.HttpClient.Response.ContentLength
             };
 
             // Send captured session to the UI
