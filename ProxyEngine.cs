@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using System.Management;
 using Titanium.Web.Proxy;
 using Titanium.Web.Proxy.EventArguments;
 using Titanium.Web.Proxy.Models;
@@ -72,6 +73,31 @@ namespace SoapProxyApp
                 if (pid > 0)
                 {
                     processName = System.Diagnostics.Process.GetProcessById(pid).ProcessName;
+
+                    // If it's an IIS worker process, extract the Application Pool name via WMI
+                    if (processName.Equals("w3wp", StringComparison.OrdinalIgnoreCase))
+                    {
+                        using (var searcher = new ManagementObjectSearcher($"SELECT CommandLine FROM Win32_Process WHERE ProcessId = {pid}"))
+                        {
+                            foreach (ManagementObject obj in searcher.Get())
+                            {
+                                string cmdLine = obj["CommandLine"]?.ToString();
+                                if (!string.IsNullOrEmpty(cmdLine))
+                                {
+                                    int apIndex = cmdLine.IndexOf("-ap \"", StringComparison.OrdinalIgnoreCase);
+                                    if (apIndex >= 0)
+                                    {
+                                        int start = apIndex + 5;
+                                        int end = cmdLine.IndexOf("\"", start);
+                                        if (end > start)
+                                        {
+                                            processName = cmdLine.Substring(start, end - start);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
             catch { /* Ignore process access exceptions */ }
