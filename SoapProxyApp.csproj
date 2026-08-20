@@ -11,9 +11,14 @@
 
   <ItemGroup>
     <Resource Include="app_icon.ico" />
+    <EmbeddedResource Include="Themes\DarkXML.xshd" />
+    <EmbeddedResource Include="Themes\DarkJSON.xshd" />
+    <EmbeddedResource Include="Themes\LightXML.xshd" />
+    <EmbeddedResource Include="Themes\LightJSON.xshd" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="AvalonEdit" Version="6.3.1.120" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="Titanium.Web.Proxy" Version="5.10.0" />
   </ItemGroup>

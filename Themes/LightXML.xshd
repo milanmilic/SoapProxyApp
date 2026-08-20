@@ -1,0 +1,53 @@
+<SyntaxDefinition name="LightXML" extensions=".xml" xmlns="http://icsharpcode.net/framework/avalonedit">
+    <Color name="Comment" foreground="#008000" />
+    <Color name="CData" foreground="#808080" />
+    <Color name="DocType" foreground="#0055BB" />
+    <Color name="XmlDeclaration" foreground="#0055BB" />
+    <Color name="XmlTag" foreground="#000000" />
+    <Color name="TagName" foreground="#008000" />
+    <Color name="AttributeName" foreground="#008080" />
+    <Color name="AttributeValue" foreground="#0055BB" />
+    <Color name="Entity" foreground="#008080" />
+    <Color name="BrokenEntity" foreground="#FF0000" />
+    
+    <RuleSet>
+        <Span color="Comment" multiline="true">
+            <Begin>&lt;!--</Begin>
+            <End>--&gt;</End>
+        </Span>
+        <Span color="CData" multiline="true">
+            <Begin>&lt;!\[CDATA\[</Begin>
+            <End>\]\]&gt;</End>
+        </Span>
+        <Span color="DocType" multiline="true">
+            <Begin>&lt;!DOCTYPE</Begin>
+            <End>&gt;</End>
+        </Span>
+        <Span color="XmlDeclaration" multiline="true">
+            <Begin>&lt;\?</Begin>
+            <End>\?&gt;</End>
+        </Span>
+        <Span color="XmlTag" multiline="true">
+            <Begin>&lt;</Begin>
+            <End>&gt;</End>
+            <RuleSet>
+                <Span color="AttributeValue" multiline="true" ruleSet="EntitySet">
+                    <Begin>"</Begin>
+                    <End>"|(?=&lt;)</End>
+                </Span>
+                <Span color="AttributeValue" multiline="true" ruleSet="EntitySet">
+                    <Begin>'</Begin>
+                    <End>'|(?=&lt;)</End>
+                </Span>
+                <Rule color="AttributeName">[\d\w_\-\.:]+(?=(\s*=))</Rule>
+                <Rule color="TagName">/?[\d\w_\-\.:]+</Rule>
+            </RuleSet>
+        </Span>
+        <Import ruleSet="EntitySet"/>
+    </RuleSet>
+    
+    <RuleSet name="EntitySet">
+        <Rule color="Entity">&amp;[\w\d\#]+;</Rule>
+        <Rule color="BrokenEntity">&amp;[\w\d\#]*</Rule>
+    </RuleSet>
+</SyntaxDefinition>

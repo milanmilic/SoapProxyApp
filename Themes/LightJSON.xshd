@@ -1,0 +1,33 @@
+<SyntaxDefinition name="LightJSON" extensions=".json" xmlns="http://icsharpcode.net/framework/avalonedit">
+    <Color name="String" foreground="#0055BB" />
+    <Color name="Number" foreground="#008080" />
+    <Color name="Boolean" foreground="#0055BB" />
+    <Color name="Null" foreground="#0055BB" />
+    <Color name="PropertyName" foreground="#008000" />
+    <Color name="Punctuation" foreground="#000000" />
+    
+    <RuleSet>
+        <Rule color="PropertyName">
+            &quot; [^&quot;\\]* &quot; \s* (?=:)
+        </Rule>
+        <Span color="String" multiline="true">
+            <Begin>&quot;</Begin>
+            <End>&quot;</End>
+            <RuleSet>
+                <Rule match="\\." />
+            </RuleSet>
+        </Span>
+        <Rule color="Number">
+            \b0[xX][0-9a-fA-F]+|(\b\d+(\.[0-9]+)?|\.[0-9]+)([eE][+-]?[0-9]+)?
+        </Rule>
+        <Rule color="Boolean">
+            \b(true|false)\b
+        </Rule>
+        <Rule color="Null">
+            \b(null)\b
+        </Rule>
+        <Rule color="Punctuation">
+            [{},:\[\]]
+        </Rule>
+    </RuleSet>
+</SyntaxDefinition>

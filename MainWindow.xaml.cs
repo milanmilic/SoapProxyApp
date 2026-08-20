@@ -6,6 +6,8 @@ using System.Xml;
 using System.Xml.Linq;
 using Microsoft.Win32;
 using Newtonsoft.Json;
+using ICSharpCode.AvalonEdit.Highlighting;
+using ICSharpCode.AvalonEdit.Highlighting.Xshd;
 
 namespace SoapProxyApp
 {
@@ -13,6 +15,9 @@ namespace SoapProxyApp
     {
         private ProxyEngine proxyEngine;
         public ObservableCollection<CapturedSession> Sessions { get; set; }
+        private bool isDarkMode = false;
+        private IHighlightingDefinition lightXml, darkXml;
+        private IHighlightingDefinition lightJson, darkJson;
 
         public MainWindow()
         {
@@ -22,6 +27,76 @@ namespace SoapProxyApp
             
             proxyEngine = new ProxyEngine();
             proxyEngine.OnSessionCompleted += ProxyEngine_OnSessionCompleted;
+
+            LoadSyntaxDefinitions();
+
+            TxtReqXmlFormatted.SyntaxHighlighting = lightXml;
+            TxtReqJson.SyntaxHighlighting = lightJson;
+            TxtResXmlFormatted.SyntaxHighlighting = lightXml;
+            TxtResJson.SyntaxHighlighting = lightJson;
+        }
+
+        private void LoadSyntaxDefinitions()
+        {
+            try
+            {
+                using (var stream = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("SoapProxyApp.Themes.LightXML.xshd"))
+                {
+                    if (stream != null)
+                        using (var reader = System.Xml.XmlReader.Create(stream))
+                            lightXml = HighlightingLoader.Load(reader, HighlightingManager.Instance);
+                }
+
+                using (var stream = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("SoapProxyApp.Themes.LightJSON.xshd"))
+                {
+                    if (stream != null)
+                        using (var reader = System.Xml.XmlReader.Create(stream))
+                            lightJson = HighlightingLoader.Load(reader, HighlightingManager.Instance);
+                }
+                using (var stream = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("SoapProxyApp.Themes.DarkXML.xshd"))
+                {
+                    if (stream != null)
+                        using (var reader = System.Xml.XmlReader.Create(stream))
+                            darkXml = HighlightingLoader.Load(reader, HighlightingManager.Instance);
+                }
+
+                using (var stream = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("SoapProxyApp.Themes.DarkJSON.xshd"))
+                {
+                    if (stream != null)
+                        using (var reader = System.Xml.XmlReader.Create(stream))
+                            darkJson = HighlightingLoader.Load(reader, HighlightingManager.Instance);
+                }
+            }
+            catch { }
+        }
+
+        private void BtnTheme_Click(object sender, RoutedEventArgs e)
+        {
+            isDarkMode = !isDarkMode;
+            if (isDarkMode)
+            {
+                BtnTheme.Content = "☀️ Light Mode";
+                var dict = new ResourceDictionary { Source = new Uri("Themes/DarkTheme.xaml", UriKind.Relative) };
+                Application.Current.Resources.MergedDictionaries.Clear();
+                Application.Current.Resources.MergedDictionaries.Add(dict);
+
+                TxtReqXmlFormatted.SyntaxHighlighting = darkXml ?? lightXml;
+                TxtReqJson.SyntaxHighlighting = darkJson ?? lightJson;
+                TxtResXmlFormatted.SyntaxHighlighting = darkXml ?? lightXml;
+                TxtResJson.SyntaxHighlighting = darkJson ?? lightJson;
+            }
+            else
+            {
+                BtnTheme.Content = "🌙 Dark Mode";
+                var dict = new ResourceDictionary { Source = new Uri("Themes/LightTheme.xaml", UriKind.Relative) };
+                Application.Current.Resources.MergedDictionaries.Clear();
+                Application.Current.Resources.MergedDictionaries.Add(dict);
+
+                TxtReqXmlFormatted.SyntaxHighlighting = lightXml;
+                TxtReqJson.SyntaxHighlighting = lightJson;
+                TxtResXmlFormatted.SyntaxHighlighting = lightXml;
+                TxtResJson.SyntaxHighlighting = lightJson;
+            }
         }
 
         private void BtnStart_Click(object sender, RoutedEventArgs e)
@@ -138,44 +213,40 @@ namespace SoapProxyApp
 
         private void BtnExportReq_Click(object sender, RoutedEventArgs e)
         {
-            ExportActiveTab(ReqTabs, TxtReqHeaders, TxtReqRaw, TxtReqXmlFormatted, TxtReqJson, "Request");
-        }
-
-        private void BtnExportRes_Click(object sender, RoutedEventArgs e)
-        {
-            ExportActiveTab(ResTabs, TxtResHeaders, TxtResRaw, TxtResXmlFormatted, TxtResJson, "Response");
-        }
-
-        private void ExportActiveTab(TabControl tabControl, TextBox txtHeaders, TextBox txtRaw, TextBox txtXml, TextBox txtJson, string prefix)
-        {
-            if (tabControl == null || LstSessions.SelectedItem == null) return;
-
+            if (ReqTabs == null || LstSessions.SelectedItem == null) return;
             string content = "";
             string ext = "txt";
             string filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*";
 
-            switch (tabControl.SelectedIndex)
+            switch (ReqTabs.SelectedIndex)
             {
-                case 0:
-                    content = txtHeaders.Text;
-                    break;
-                case 1:
-                    content = txtRaw.Text;
-                    ext = "xml";
-                    filter = "XML files (*.xml)|*.xml|Text files (*.txt)|*.txt|All files (*.*)|*.*";
-                    break;
-                case 2:
-                    content = txtXml.Text;
-                    ext = "xml";
-                    filter = "XML files (*.xml)|*.xml|Text files (*.txt)|*.txt|All files (*.*)|*.*";
-                    break;
-                case 3:
-                    content = txtJson.Text;
-                    ext = "json";
-                    filter = "JSON files (*.json)|*.json|Text files (*.txt)|*.txt|All files (*.*)|*.*";
-                    break;
+                case 0: content = TxtReqHeaders.Text; break;
+                case 1: content = TxtReqRaw.Text; ext = "xml"; filter = "XML files (*.xml)|*.xml|All files (*.*)|*.*"; break;
+                case 2: content = TxtReqXmlFormatted.Text; ext = "xml"; filter = "XML files (*.xml)|*.xml|All files (*.*)|*.*"; break;
+                case 3: content = TxtReqJson.Text; ext = "json"; filter = "JSON files (*.json)|*.json|All files (*.*)|*.*"; break;
             }
+            DoExport(content, ext, filter, "Request");
+        }
 
+        private void BtnExportRes_Click(object sender, RoutedEventArgs e)
+        {
+            if (ResTabs == null || LstSessions.SelectedItem == null) return;
+            string content = "";
+            string ext = "txt";
+            string filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*";
+
+            switch (ResTabs.SelectedIndex)
+            {
+                case 0: content = TxtResHeaders.Text; break;
+                case 1: content = TxtResRaw.Text; ext = "xml"; filter = "XML files (*.xml)|*.xml|All files (*.*)|*.*"; break;
+                case 2: content = TxtResXmlFormatted.Text; ext = "xml"; filter = "XML files (*.xml)|*.xml|All files (*.*)|*.*"; break;
+                case 3: content = TxtResJson.Text; ext = "json"; filter = "JSON files (*.json)|*.json|All files (*.*)|*.*"; break;
+            }
+            DoExport(content, ext, filter, "Response");
+        }
+
+        private void DoExport(string content, string ext, string filter, string prefix)
+        {
             if (string.IsNullOrWhiteSpace(content))
             {
                 MessageBox.Show("No content to export.", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
