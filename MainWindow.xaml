@@ -80,7 +80,7 @@
                                     <Run Text=" | Method: " />
                                     <Run Text="{Binding Method}" />
                                     <Run Text=" | Length: " />
-                                    <Run Text="{Binding FormattedLength}" />
+                                    <Run Text="{Binding FormattedLength, Mode=OneWay}" />
                                 </TextBlock>
                             </StackPanel>
                         </Border>
