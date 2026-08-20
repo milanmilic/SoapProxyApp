@@ -64,6 +64,8 @@ namespace SoapProxyApp
                 await e.GetResponseBodyAsString();
             }
 
+            var soapActionHeader = e.HttpClient.Request.Headers.FirstOrDefault(h => h.Name.Equals("SOAPAction", StringComparison.OrdinalIgnoreCase));
+
             var session = new CapturedSession
             {
                 Url = e.HttpClient.Request.Url,
@@ -72,7 +74,8 @@ namespace SoapProxyApp
                 RequestHeaders = string.Join(Environment.NewLine, e.HttpClient.Request.Headers.Select(h => $"{h.Name}: {h.Value}")),
                 RequestBody = e.HttpClient.Request.IsBodyRead ? e.HttpClient.Request.BodyString : "",
                 ResponseHeaders = string.Join(Environment.NewLine, e.HttpClient.Response.Headers.Select(h => $"{h.Name}: {h.Value}")),
-                ResponseBody = e.HttpClient.Response.IsBodyRead ? e.HttpClient.Response.BodyString : ""
+                ResponseBody = e.HttpClient.Response.IsBodyRead ? e.HttpClient.Response.BodyString : "",
+                SoapAction = soapActionHeader?.Value
             };
 
             // Send captured session to the UI

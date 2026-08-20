@@ -205,6 +205,16 @@ namespace SoapProxyApp
         {
             if (LstSessions.SelectedItem is CapturedSession session)
             {
+                if (!string.IsNullOrWhiteSpace(session.SoapAction))
+                {
+                    TxtReqSoapAction.Text = $"SOAPAction: {session.SoapAction}";
+                    TxtReqSoapAction.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    TxtReqSoapAction.Visibility = Visibility.Collapsed;
+                }
+
                 TxtReqHeaders.Text = session.RequestHeaders;
                 TxtReqRaw.Text = session.RequestBody;
                 TxtReqXmlFormatted.Text = ""; 

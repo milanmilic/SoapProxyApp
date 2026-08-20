@@ -117,7 +117,8 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
-                        <Button Name="BtnExportReq" Content="💾 Export" Grid.Row="0" HorizontalAlignment="Right" Padding="15,3" Margin="0,0,0,2" Click="BtnExportReq_Click" Background="#2196F3" Foreground="White" BorderThickness="0" FontWeight="Bold" Cursor="Hand"/>
+                        <TextBlock Name="TxtReqSoapAction" Grid.Row="0" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,0,0,5" FontWeight="Normal" Foreground="{DynamicResource TextFg}" Visibility="Collapsed" />
+                        <Button Name="BtnExportReq" Content="💾 Export" Grid.Row="0" HorizontalAlignment="Right" Padding="15,3" Margin="0,0,0,5" Click="BtnExportReq_Click" Background="#2196F3" Foreground="White" BorderThickness="0" FontWeight="Bold" Cursor="Hand"/>
                         <TabControl Name="ReqTabs" Grid.Row="1" Margin="0" FontWeight="Normal" SelectionChanged="ReqTabs_SelectionChanged" Background="{DynamicResource PanelBg}" BorderBrush="{DynamicResource BorderColor}">
                             <TabItem Header="Headers">
                                 <TextBox Name="TxtReqHeaders" />
