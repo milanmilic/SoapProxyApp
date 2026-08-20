@@ -65,6 +65,16 @@ namespace SoapProxyApp
             }
 
             var soapActionHeader = e.HttpClient.Request.Headers.FirstOrDefault(h => h.Name.Equals("SOAPAction", StringComparison.OrdinalIgnoreCase));
+            string processName = "Unknown";
+            try
+            {
+                int pid = e.HttpClient.ProcessId.Value;
+                if (pid > 0)
+                {
+                    processName = System.Diagnostics.Process.GetProcessById(pid).ProcessName;
+                }
+            }
+            catch { /* Ignore process access exceptions */ }
 
             var session = new CapturedSession
             {
@@ -75,7 +85,8 @@ namespace SoapProxyApp
                 RequestBody = e.HttpClient.Request.IsBodyRead ? e.HttpClient.Request.BodyString : "",
                 ResponseHeaders = string.Join(Environment.NewLine, e.HttpClient.Response.Headers.Select(h => $"{h.Name}: {h.Value}")),
                 ResponseBody = e.HttpClient.Response.IsBodyRead ? e.HttpClient.Response.BodyString : "",
-                SoapAction = soapActionHeader?.Value
+                SoapAction = soapActionHeader?.Value,
+                ProcessName = processName
             };
 
             // Send captured session to the UI

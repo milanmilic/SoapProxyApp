@@ -79,6 +79,8 @@
                                     <Run Text="{Binding StatusCode}" FontWeight="Bold" />
                                     <Run Text=" | Method: " />
                                     <Run Text="{Binding Method}" />
+                                    <Run Text=" | App: " />
+                                    <Run Text="{Binding ProcessName}" />
                                     <Run Text=" | Length: " />
                                     <Run Text="{Binding FormattedLength, Mode=OneWay}" />
                                 </TextBlock>

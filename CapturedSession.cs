@@ -14,6 +14,7 @@ namespace SoapProxyApp
         public string ResponseBody { get; set; }
         public DateTime Timestamp { get; set; } = DateTime.Now;
         public string SoapAction { get; set; }
+        public string ProcessName { get; set; }
         
         public long ContentLength => string.IsNullOrEmpty(ResponseBody) ? 0 : System.Text.Encoding.UTF8.GetByteCount(ResponseBody);
 
