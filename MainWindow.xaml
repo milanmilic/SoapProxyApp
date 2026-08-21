@@ -40,6 +40,7 @@
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <TextBlock Text="Port:" VerticalAlignment="Center" Margin="0,0,5,0" FontWeight="Bold" Foreground="{DynamicResource TextFg}"/>
                     <TextBox Name="TxtPort" Text="8899" Width="60" Padding="2" Background="{DynamicResource PanelBg}" Foreground="{DynamicResource TextFg}" IsReadOnly="False" BorderThickness="1" BorderBrush="{DynamicResource BorderColor}" Margin="0,0,15,0" VerticalAlignment="Center"/>
+                    <CheckBox Name="ChkSystemProxy" Content="System Proxy" VerticalAlignment="Center" Margin="0,0,15,0" Foreground="{DynamicResource TextFg}" ToolTip="Capture ALL system HTTP/HTTPS traffic (like Fiddler)" />
                     <Button Name="BtnStart" Content="Start Proxy" Width="100" Height="30" Margin="0,0,10,0" Click="BtnStart_Click" FontWeight="Bold"/>
                     <Button Name="BtnStop" Content="Stop Proxy" Width="100" Height="30" IsEnabled="False" Click="BtnStop_Click"/>
                     <Button Name="BtnClear" Content="🗑 Clear All" Width="90" Height="30" Margin="10,0,0,0" Click="BtnClear_Click" Background="#FF9800" Foreground="White" BorderThickness="0" FontWeight="Bold"/>

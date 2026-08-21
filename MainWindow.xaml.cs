@@ -174,11 +174,13 @@ namespace SoapProxyApp
                 return;
             }
 
-            proxyEngine.Start(port);
+            bool isSystemProxy = ChkSystemProxy.IsChecked == true;
+            proxyEngine.Start(port, isSystemProxy);
             TxtPort.IsEnabled = false;
+            ChkSystemProxy.IsEnabled = false;
             BtnStart.IsEnabled = false;
             BtnStop.IsEnabled = true;
-            TxtStatus.Text = $"Proxy is running on 127.0.0.1:{port}";
+            TxtStatus.Text = $"Proxy is running on 127.0.0.1:{port}" + (isSystemProxy ? " (System Proxy)" : "");
             TxtStatus.Foreground = System.Windows.Media.Brushes.Green;
         }
 
@@ -186,6 +188,7 @@ namespace SoapProxyApp
         {
             proxyEngine.Stop();
             TxtPort.IsEnabled = true;
+            ChkSystemProxy.IsEnabled = true;
             BtnStart.IsEnabled = true;
             BtnStop.IsEnabled = false;
             TxtStatus.Text = "Proxy is stopped.";

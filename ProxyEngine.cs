@@ -16,7 +16,7 @@ namespace SoapProxyApp
 
         public event EventHandler<CapturedSession> OnSessionCompleted;
 
-        public void Start(int port)
+        public void Start(int port, bool setAsSystemProxy = false)
         {
             proxyServer = new ProxyServer();
             proxyServer.CertificateManager.CreateRootCertificate();
@@ -29,6 +29,12 @@ namespace SoapProxyApp
             explicitEndPoint = new ExplicitProxyEndPoint(IPAddress.Any, port, true);
             proxyServer.AddEndPoint(explicitEndPoint);
             proxyServer.Start();
+            
+            if (setAsSystemProxy)
+            {
+                proxyServer.SetAsSystemHttpProxy(explicitEndPoint);
+                proxyServer.SetAsSystemHttpsProxy(explicitEndPoint);
+            }
         }
 
         public System.Security.Cryptography.X509Certificates.X509Certificate2 GetRootCertificate()
