@@ -29,7 +29,10 @@ This application is **Portable** and does not require an installation wizard or 
 ## What's New (Changelog)
 
 ### v2.0.0
-- **Auto-Responder (Mocking):** Create mock rules to intercept outgoing requests based on their URL, and instantly return a fake response directly from the proxy! This enables offline development, simulates edge-case server errors (e.g., 500 Internal Server Error), and allows manipulating payloads on the fly without touching the real server backend.
+- **Auto-Responder (Mocking):** Create mock rules to intercept outgoing requests based on their URL, and instantly return a fake response directly from the proxy! This enables offline development, simulates edge-case server errors (e.g., 500 Internal Server Error), and allows manipulating payloads on the fly without touching the real server backend. Mocked requests are clearly marked as `[MOCKED]` in the session list.
+- **Mock in Replay:** The Replay Window also evaluates your Mock Rules, allowing you to test mock responses directly via manual resends.
+- **Search (Ctrl+F):** Added a powerful built-in Search Panel to all code editors (Request/Response Raw, Replay Window, Mock Editor). Simply click inside the code editor and press `Ctrl+F` to search through massive XML/JSON payloads with support for Match Case, Whole Word, and Regex.
+- **IIS AppPool Detection:** Accurately reads process names using WMI, properly displaying the exact IIS Application Pool name (instead of generic `w3wp`) even for mocked sessions.
 
 ### v1.9.1
 - **Granular Save/Load:** You can now save individual or multi-selected sessions via the right-click context menu. Loading sessions now intelligently prompts whether to append to the existing list or clear it first.
