@@ -72,6 +72,46 @@ namespace SoapProxyApp
                         fakeHeaders);
                         
                     // Short-circuit: we don't proceed to read request or contact the server
+                    
+                    e.UserData = "MOCKED"; // Flag for OnResponse to ignore if it fires
+
+                    // Build the session manually to show it in the UI
+                    string processName = "Unknown [MOCKED]";
+                    try
+                    {
+                        if (e.HttpClient.ProcessId != null && e.HttpClient.ProcessId.Value > 0)
+                        {
+                            processName = System.Diagnostics.Process.GetProcessById(e.HttpClient.ProcessId.Value).ProcessName + " [MOCKED]";
+                        }
+                    }
+                    catch { }
+
+                    string reqBody = "";
+                    byte[] reqBytes = null;
+                    if (e.HttpClient.Request.HasBody)
+                    {
+                        try {
+                            reqBytes = e.HttpClient.Request.Body;
+                            if (reqBytes != null) reqBody = System.Text.Encoding.UTF8.GetString(reqBytes);
+                        } catch { }
+                    }
+
+                    var session = new CapturedSession
+                    {
+                        Url = e.HttpClient.Request.Url,
+                        Method = e.HttpClient.Request.Method,
+                        StatusCode = mockRule.StatusCode,
+                        RequestHeaders = string.Join(Environment.NewLine, e.HttpClient.Request.Headers.Select(h => $"{h.Name}: {h.Value}")),
+                        RequestBody = reqBody,
+                        RequestBodyBytes = reqBytes,
+                        ResponseHeaders = $"Content-Type: {mockRule.ContentType}",
+                        ResponseBody = mockRule.ResponseBody ?? "",
+                        ResponseBodyBytes = System.Text.Encoding.UTF8.GetBytes(mockRule.ResponseBody ?? ""),
+                        ProcessName = processName,
+                        Timestamp = DateTime.Now
+                    };
+
+                    OnSessionCompleted?.Invoke(this, session);
                     return;
                 }
             }
@@ -85,6 +125,8 @@ namespace SoapProxyApp
 
         private async Task OnResponse(object sender, SessionEventArgs e)
         {
+            if (e.UserData as string == "MOCKED") return;
+
             // When response is complete, read it and package into our model
             if (e.HttpClient.Response.HasBody)
             {
