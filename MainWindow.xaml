@@ -89,6 +89,8 @@
                 <ListBox Name="LstSessions" Grid.Row="1" Margin="0" SelectionMode="Extended" SelectionChanged="LstSessions_SelectionChanged" BorderBrush="{DynamicResource BorderColor}" BorderThickness="1" Background="{DynamicResource PanelBg}">
                 <ListBox.ContextMenu>
                     <ContextMenu>
+                        <MenuItem Header="Replay / Resend Request" Click="MenuReplay_Click" FontWeight="Bold" />
+                        <Separator />
                         <MenuItem Header="Compare Requests (VS Code / WinMerge)" Click="MenuCompareReq_Click" />
                         <MenuItem Header="Compare Responses (VS Code / WinMerge)" Click="MenuCompareRes_Click" />
                     </ContextMenu>

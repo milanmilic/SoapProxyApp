@@ -298,6 +298,21 @@ namespace SoapProxyApp
             return safeName + ".xml";
         }
 
+        private void MenuReplay_Click(object sender, RoutedEventArgs e)
+        {
+            if (LstSessions.SelectedItem is CapturedSession session)
+            {
+                if (int.TryParse(TxtPort.Text, out int port))
+                {
+                    var replayWindow = new ReplayWindow(session.Method, session.Url, session.RequestHeaders, session.RequestBody, port)
+                    {
+                        Owner = this
+                    };
+                    replayWindow.ShowDialog();
+                }
+            }
+        }
+
         private void MenuCompareReq_Click(object sender, RoutedEventArgs e)
         {
             if (LstSessions.SelectedItems.Count != 2)
