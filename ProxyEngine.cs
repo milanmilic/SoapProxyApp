@@ -76,15 +76,12 @@ namespace SoapProxyApp
                     e.UserData = "MOCKED"; // Flag for OnResponse to ignore if it fires
 
                     // Build the session manually to show it in the UI
-                    string processName = "Unknown [MOCKED]";
-                    try
+                    string processName = "Unknown";
+                    if (e.HttpClient.ProcessId != null && e.HttpClient.ProcessId.Value > 0)
                     {
-                        if (e.HttpClient.ProcessId != null && e.HttpClient.ProcessId.Value > 0)
-                        {
-                            processName = System.Diagnostics.Process.GetProcessById(e.HttpClient.ProcessId.Value).ProcessName + " [MOCKED]";
-                        }
+                        processName = GetProcessName(e.HttpClient.ProcessId.Value);
                     }
-                    catch { }
+                    processName += " [MOCKED]";
 
                     string reqBody = "";
                     byte[] reqBytes = null;
@@ -123,21 +120,11 @@ namespace SoapProxyApp
             }
         }
 
-        private async Task OnResponse(object sender, SessionEventArgs e)
+        private string GetProcessName(int pid)
         {
-            if (e.UserData as string == "MOCKED") return;
-
-            // When response is complete, read it and package into our model
-            if (e.HttpClient.Response.HasBody)
-            {
-                await e.GetResponseBodyAsString();
-            }
-
-            var soapActionHeader = e.HttpClient.Request.Headers.FirstOrDefault(h => h.Name.Equals("SOAPAction", StringComparison.OrdinalIgnoreCase));
             string processName = "Unknown";
             try
             {
-                int pid = e.HttpClient.ProcessId.Value;
                 if (pid > 0)
                 {
                     processName = System.Diagnostics.Process.GetProcessById(pid).ProcessName;
@@ -145,9 +132,9 @@ namespace SoapProxyApp
                     // If it's an IIS worker process, extract the Application Pool name via WMI
                     if (processName.Equals("w3wp", StringComparison.OrdinalIgnoreCase))
                     {
-                        using (var searcher = new ManagementObjectSearcher($"SELECT CommandLine FROM Win32_Process WHERE ProcessId = {pid}"))
+                        using (var searcher = new System.Management.ManagementObjectSearcher($"SELECT CommandLine FROM Win32_Process WHERE ProcessId = {pid}"))
                         {
-                            foreach (ManagementObject obj in searcher.Get())
+                            foreach (System.Management.ManagementObject obj in searcher.Get())
                             {
                                 string cmdLine = obj["CommandLine"]?.ToString();
                                 if (!string.IsNullOrEmpty(cmdLine))
@@ -169,6 +156,25 @@ namespace SoapProxyApp
                 }
             }
             catch { /* Ignore process access exceptions */ }
+            return processName;
+        }
+
+        private async Task OnResponse(object sender, SessionEventArgs e)
+        {
+            if (e.UserData as string == "MOCKED") return;
+
+            // When response is complete, read it and package into our model
+            if (e.HttpClient.Response.HasBody)
+            {
+                await e.GetResponseBodyAsString();
+            }
+
+            var soapActionHeader = e.HttpClient.Request.Headers.FirstOrDefault(h => h.Name.Equals("SOAPAction", StringComparison.OrdinalIgnoreCase));
+            string processName = "Unknown";
+            if (e.HttpClient.ProcessId != null && e.HttpClient.ProcessId.Value > 0)
+            {
+                processName = GetProcessName(e.HttpClient.ProcessId.Value);
+            }
 
             var session = new CapturedSession
             {
