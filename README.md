@@ -1,8 +1,9 @@
-# SOAP Proxy App
+# SoapProxyApp: Lightweight HTTP & SOAP API Debugger
 
-A Windows WPF application designed for intercepting, inspecting, and replaying SOAP and JSON network traffic.
+**SoapProxyApp** is an open-source HTTP/HTTPS traffic monitor and API mocking tool for Windows. Designed specifically for .NET developers working with WCF, SOAP, and REST web services, it serves as a fast, lightweight, and portable alternative to Fiddler, Charles Proxy, or Postman.
 
-## Features
+## Key Features
+- **API Auto-Responder & Mocking:** Intercept outgoing API requests and return fake payloads to test edge-cases, simulate offline development, or inject 500 Server Errors without touching the real backend.
 - Intercept HTTP/HTTPS request and response packets (Explicit or Global System Proxy)
 - **Replay / Resend Requests** to the server with modified headers and body, on the fly!
 - View raw Headers, Raw Body, Formatted XML, Formatted JSON, HTML, and Images
