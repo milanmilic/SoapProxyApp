@@ -62,7 +62,31 @@
             </Grid.ColumnDefinitions>
 
             <!-- Left Column: Sessions List -->
-            <ListBox Name="LstSessions" Grid.Column="0" Margin="10" SelectionMode="Extended" SelectionChanged="LstSessions_SelectionChanged" BorderBrush="{DynamicResource BorderColor}" BorderThickness="1" Background="{DynamicResource PanelBg}">
+            <Grid Grid.Column="0" Margin="10">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                
+                <Border Grid.Row="0" BorderBrush="{DynamicResource BorderColor}" BorderThickness="1" Margin="0,0,0,5" Background="{DynamicResource PanelBg}" CornerRadius="2">
+                    <Grid>
+                        <TextBlock Text="🔍 Filter (URL, App, Method...)" Margin="5,0" VerticalAlignment="Center" Foreground="{DynamicResource TextFg}" Opacity="0.5" IsHitTestVisible="False">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Hidden"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Text.Length, ElementName=TxtFilter}" Value="0">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                        <TextBox Name="TxtFilter" Background="Transparent" Foreground="{DynamicResource TextFg}" BorderThickness="0" Padding="5" TextChanged="TxtFilter_TextChanged"/>
+                    </Grid>
+                </Border>
+
+                <ListBox Name="LstSessions" Grid.Row="1" Margin="0" SelectionMode="Extended" SelectionChanged="LstSessions_SelectionChanged" BorderBrush="{DynamicResource BorderColor}" BorderThickness="1" Background="{DynamicResource PanelBg}">
                 <ListBox.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="Compare Requests (VS Code / WinMerge)" Click="MenuCompareReq_Click" />
@@ -115,6 +139,7 @@
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
+            </Grid>
 
             <!-- Vertical Splitter -->
             <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" Background="{DynamicResource BorderColor}" ShowsPreview="True"/>

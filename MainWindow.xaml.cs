@@ -208,6 +208,31 @@ namespace SoapProxyApp
             TxtResRaw.Text = "";
             TxtResXmlFormatted.Text = "";
             TxtResJson.Text = "";
+            
+            TxtReqSoapAction.Visibility = Visibility.Collapsed;
+        }
+
+        private void TxtFilter_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            string filterText = TxtFilter.Text.ToLower();
+            if (string.IsNullOrWhiteSpace(filterText))
+            {
+                System.Windows.Data.CollectionViewSource.GetDefaultView(Sessions).Filter = null;
+            }
+            else
+            {
+                System.Windows.Data.CollectionViewSource.GetDefaultView(Sessions).Filter = item =>
+                {
+                    if (item is CapturedSession s)
+                    {
+                        return (s.Url?.ToLower().Contains(filterText) == true) ||
+                               (s.ProcessName?.ToLower().Contains(filterText) == true) ||
+                               (s.Method?.ToLower().Contains(filterText) == true) ||
+                               (s.StatusCode.ToString().Contains(filterText) == true);
+                    }
+                    return false;
+                };
+            }
         }
 
         private void BtnExportCert_Click(object sender, RoutedEventArgs e)
