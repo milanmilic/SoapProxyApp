@@ -28,6 +28,10 @@ This application is **Portable** and does not require an installation wizard or 
 
 ## What's New (Changelog)
 
+### v1.9.0
+- **Save & Load Sessions:** Save captured transactions to a `.sps` file and load them later for offline inspection.
+- **Delete Transactions:** Select specific transactions in the list and remove them via the context menu or by pressing the `Delete` key.
+
 ### v1.8.0
 - **Replay / Resend Request:** Right-click any captured session to open it in a Replay Window. Edit the URL, Method, Headers (including auth tokens), and Body, then send it again. The replayed request is automatically routed through the proxy so you can inspect the response!
 

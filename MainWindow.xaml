@@ -44,6 +44,8 @@
                     <Button Name="BtnStart" Content="Start Proxy" Width="100" Height="30" Margin="0,0,10,0" Click="BtnStart_Click" FontWeight="Bold"/>
                     <Button Name="BtnStop" Content="Stop Proxy" Width="100" Height="30" IsEnabled="False" Click="BtnStop_Click"/>
                     <Button Name="BtnClear" Content="🗑 Clear All" Width="90" Height="30" Margin="10,0,0,0" Click="BtnClear_Click" Background="#FF9800" Foreground="White" BorderThickness="0" FontWeight="Bold"/>
+                    <Button Name="BtnSave" Content="💾 Save" Width="80" Height="30" Margin="10,0,0,0" Click="BtnSave_Click"/>
+                    <Button Name="BtnLoad" Content="📂 Load" Width="80" Height="30" Margin="5,0,0,0" Click="BtnLoad_Click"/>
                     <Button Name="BtnExportCert" Content="Install Cert" ToolTip="Installs to Local Machine (Requires Admin)" Width="100" Height="30" Margin="10,0,0,0" Click="BtnExportCert_Click"/>
                     
                     <Button Name="BtnTheme" Content="🌙 Dark Mode" Width="110" Height="30" Margin="15,0,0,0" Click="BtnTheme_Click"/>
@@ -86,10 +88,11 @@
                     </Grid>
                 </Border>
 
-                <ListBox Name="LstSessions" Grid.Row="1" Margin="0" SelectionMode="Extended" SelectionChanged="LstSessions_SelectionChanged" BorderBrush="{DynamicResource BorderColor}" BorderThickness="1" Background="{DynamicResource PanelBg}">
+                <ListBox Name="LstSessions" Grid.Row="1" Margin="0" SelectionMode="Extended" SelectionChanged="LstSessions_SelectionChanged" KeyDown="LstSessions_KeyDown" BorderBrush="{DynamicResource BorderColor}" BorderThickness="1" Background="{DynamicResource PanelBg}">
                 <ListBox.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="Replay / Resend Request" Click="MenuReplay_Click" FontWeight="Bold" />
+                        <MenuItem Header="Delete Selected" Click="MenuDelete_Click" Foreground="Red" />
                         <Separator />
                         <MenuItem Header="Compare Requests (VS Code / WinMerge)" Click="MenuCompareReq_Click" />
                         <MenuItem Header="Compare Responses (VS Code / WinMerge)" Click="MenuCompareRes_Click" />

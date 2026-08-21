@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Controls;
 using System.IO;
 using System.Diagnostics;
@@ -202,15 +204,102 @@ namespace SoapProxyApp
 
             TxtReqHeaders.Text = "";
             TxtReqRaw.Text = "";
+            TxtReqHtml.Text = "";
+            ImgReqImage.Source = null;
             TxtReqXmlFormatted.Text = "";
             TxtReqJson.Text = "";
 
             TxtResHeaders.Text = "";
             TxtResRaw.Text = "";
+            TxtResHtml.Text = "";
+            ImgResImage.Source = null;
             TxtResXmlFormatted.Text = "";
             TxtResJson.Text = "";
             
             TxtReqSoapAction.Visibility = Visibility.Collapsed;
+        }
+
+        private void BtnSave_Click(object sender, RoutedEventArgs e)
+        {
+            var dlg = new SaveFileDialog
+            {
+                Filter = "SoapProxy Sessions (*.sps)|*.sps",
+                DefaultExt = ".sps",
+                FileName = $"Session_{DateTime.Now:yyyyMMdd_HHmmss}"
+            };
+
+            if (dlg.ShowDialog() == true)
+            {
+                try
+                {
+                    string json = JsonConvert.SerializeObject(Sessions, Newtonsoft.Json.Formatting.Indented);
+                    File.WriteAllText(dlg.FileName, json);
+                    MessageBox.Show($"Saved {Sessions.Count} sessions successfully.", "Saved", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error saving sessions: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        private void BtnLoad_Click(object sender, RoutedEventArgs e)
+        {
+            var dlg = new OpenFileDialog
+            {
+                Filter = "SoapProxy Sessions (*.sps)|*.sps"
+            };
+
+            if (dlg.ShowDialog() == true)
+            {
+                try
+                {
+                    string json = File.ReadAllText(dlg.FileName);
+                    var loaded = JsonConvert.DeserializeObject<List<CapturedSession>>(json);
+                    if (loaded != null)
+                    {
+                        BtnClear_Click(null, null); // Clear existing
+                        foreach (var s in loaded)
+                        {
+                            Sessions.Add(s);
+                        }
+                        MessageBox.Show($"Loaded {loaded.Count} sessions successfully.", "Loaded", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error loading sessions: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        private void DeleteSelectedSessions()
+        {
+            if (LstSessions.SelectedItems.Count > 0)
+            {
+                var selected = LstSessions.SelectedItems.Cast<CapturedSession>().ToList();
+                foreach (var item in selected)
+                {
+                    Sessions.Remove(item);
+                }
+                if (Sessions.Count == 0)
+                {
+                    BtnClear_Click(null, null);
+                }
+            }
+        }
+
+        private void MenuDelete_Click(object sender, RoutedEventArgs e)
+        {
+            DeleteSelectedSessions();
+        }
+
+        private void LstSessions_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Delete)
+            {
+                DeleteSelectedSessions();
+            }
         }
 
         private void TxtFilter_TextChanged(object sender, TextChangedEventArgs e)
