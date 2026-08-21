@@ -18,7 +18,13 @@ namespace SoapProxyApp
                 TxtUrlMatch.Text = Rule.UrlMatch;
                 TxtStatusCode.Text = Rule.StatusCode.ToString();
                 TxtContentType.Text = Rule.ContentType;
-                TxtResponseBody.Text = Rule.ResponseBody;
+
+                if (Rule.ContentType?.ToLower().Contains("xml") == true || Rule.ContentType?.ToLower().Contains("soap") == true)
+                    TxtResponseBody.Text = FormatXml(Rule.ResponseBody);
+                else if (Rule.ContentType?.ToLower().Contains("json") == true)
+                    TxtResponseBody.Text = FormatJson(Rule.ResponseBody);
+                else
+                    TxtResponseBody.Text = Rule.ResponseBody;
             }
             else
             {
@@ -28,6 +34,20 @@ namespace SoapProxyApp
             }
             SetSyntax();
             TxtContentType.TextChanged += (s, e) => SetSyntax();
+        }
+
+        private string FormatXml(string xml)
+        {
+            if (string.IsNullOrWhiteSpace(xml)) return "";
+            try { return System.Xml.Linq.XDocument.Parse(xml).ToString(); }
+            catch { return xml; }
+        }
+
+        private string FormatJson(string json)
+        {
+            if (string.IsNullOrWhiteSpace(json)) return "";
+            try { return Newtonsoft.Json.Linq.JToken.Parse(json).ToString(Newtonsoft.Json.Formatting.Indented); }
+            catch { return json; }
         }
 
         private void SetSyntax()
