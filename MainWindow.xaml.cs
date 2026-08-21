@@ -46,6 +46,8 @@ namespace SoapProxyApp
             Sessions = new ObservableCollection<CapturedSession>();
             LstSessions.ItemsSource = Sessions;
             TxtVersion.Text = AppVersion;
+            
+            MockRulesManager.LoadRules();
 
             proxyEngine = new ProxyEngine();
             proxyEngine.OnSessionCompleted += ProxyEngine_OnSessionCompleted;
@@ -423,6 +425,41 @@ namespace SoapProxyApp
                 safeName = safeName.Replace(c, '_');
             }
             return safeName + ".xml";
+        }
+
+        private void BtnMock_Click(object sender, RoutedEventArgs e)
+        {
+            var win = new MockRulesManagerWindow() { Owner = this };
+            win.ShowDialog();
+        }
+
+        private void MenuMock_Click(object sender, RoutedEventArgs e)
+        {
+            if (LstSessions.SelectedItem is CapturedSession session)
+            {
+                var newRule = new MockRule
+                {
+                    UrlMatch = session.Url.Length > 50 ? session.Url.Substring(0, 50) : session.Url,
+                    StatusCode = session.StatusCode > 0 ? session.StatusCode : 200,
+                    ResponseBody = session.ResponseBody ?? "",
+                };
+                
+                // Extract Content-Type
+                var ctLine = session.ResponseHeaders?.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+                                      .FirstOrDefault(h => h.StartsWith("Content-Type:", StringComparison.OrdinalIgnoreCase));
+                if (ctLine != null)
+                {
+                    newRule.ContentType = ctLine.Substring(ctLine.IndexOf(':') + 1).Trim();
+                }
+
+                var editor = new MockRuleEditorWindow(newRule) { Owner = this };
+                if (editor.ShowDialog() == true)
+                {
+                    MockRulesManager.AddRule(editor.Rule);
+                    var win = new MockRulesManagerWindow() { Owner = this };
+                    win.ShowDialog();
+                }
+            }
         }
 
         private void MenuReplay_Click(object sender, RoutedEventArgs e)

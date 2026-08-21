@@ -1,0 +1,41 @@
+<Window x:Class="SoapProxyApp.MockRuleEditorWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:avalonedit="http://icsharpcode.net/sharpdevelop/avalonedit"
+        Title="Mock Rule Editor" Height="600" Width="800" WindowStartupLocation="CenterOwner" Background="{DynamicResource WindowBg}">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="If outgoing request URL contains:" FontWeight="Bold" Foreground="{DynamicResource TextFg}" Margin="0,0,0,5"/>
+        <TextBox Name="TxtUrlMatch" Grid.Row="1" Padding="5" Margin="0,0,0,15" Background="{DynamicResource PanelBg}" Foreground="{DynamicResource TextFg}" BorderBrush="{DynamicResource BorderColor}"/>
+
+        <Grid Grid.Row="2" Margin="0,0,0,15">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="100"/>
+                <ColumnDefinition Width="20"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="Return Status Code:" VerticalAlignment="Center" FontWeight="Bold" Foreground="{DynamicResource TextFg}" Margin="0,0,5,0"/>
+            <TextBox Name="TxtStatusCode" Grid.Column="1" Padding="5" Background="{DynamicResource PanelBg}" Foreground="{DynamicResource TextFg}" BorderBrush="{DynamicResource BorderColor}"/>
+            
+            <TextBlock Grid.Column="3" Text="Content-Type:" VerticalAlignment="Center" FontWeight="Bold" Foreground="{DynamicResource TextFg}" Margin="0,0,5,0"/>
+            <TextBox Name="TxtContentType" Grid.Column="4" Padding="5" Background="{DynamicResource PanelBg}" Foreground="{DynamicResource TextFg}" BorderBrush="{DynamicResource BorderColor}"/>
+        </Grid>
+
+        <TextBlock Grid.Row="3" Text="Return Fake Response Body:" FontWeight="Bold" Foreground="{DynamicResource TextFg}" Margin="0,0,0,5"/>
+        <avalonedit:TextEditor Name="TxtResponseBody" Grid.Row="3" Margin="0,25,0,10" FontFamily="Consolas" FontSize="14" ShowLineNumbers="True" Background="{DynamicResource PanelBg}" Foreground="{DynamicResource TextFg}" BorderBrush="{DynamicResource BorderColor}" BorderThickness="1"/>
+
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Content="Cancel" Width="100" Height="30" Margin="0,0,10,0" Click="BtnCancel_Click"/>
+            <Button Content="Save Rule" Width="100" Height="30" FontWeight="Bold" Click="BtnSave_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

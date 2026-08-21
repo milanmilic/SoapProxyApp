@@ -46,6 +46,7 @@
                     <Button Name="BtnClear" Content="🗑 Clear All" Width="90" Height="30" Margin="10,0,0,0" Click="BtnClear_Click" Background="#FF9800" Foreground="White" BorderThickness="0" FontWeight="Bold"/>
                     <Button Name="BtnSave" Content="💾 Save" Width="80" Height="30" Margin="10,0,0,0" Click="BtnSave_Click"/>
                     <Button Name="BtnLoad" Content="📂 Load" Width="80" Height="30" Margin="5,0,0,0" Click="BtnLoad_Click"/>
+                    <Button Name="BtnMock" Content="🎭 Mock Rules" Width="100" Height="30" Margin="15,0,0,0" Click="BtnMock_Click" Background="#2196F3" Foreground="White" BorderThickness="0" FontWeight="Bold"/>
                     <Button Name="BtnExportCert" Content="Install Cert" ToolTip="Installs to Local Machine (Requires Admin)" Width="100" Height="30" Margin="10,0,0,0" Click="BtnExportCert_Click"/>
                     
                     <Button Name="BtnTheme" Content="🌙 Dark Mode" Width="110" Height="30" Margin="15,0,0,0" Click="BtnTheme_Click"/>
@@ -92,6 +93,7 @@
                 <ListBox.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="Replay / Resend Request" Click="MenuReplay_Click" FontWeight="Bold" />
+                        <MenuItem Header="🎭 Mock this Endpoint..." Click="MenuMock_Click" FontWeight="Bold" Foreground="#2196F3" />
                         <MenuItem Header="Delete Selected" Click="MenuDelete_Click" Foreground="Red" />
                         <Separator />
                         <MenuItem Header="💾 Save Selected Session(s)..." Click="MenuSaveSelected_Click" />

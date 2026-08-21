@@ -56,7 +56,27 @@ namespace SoapProxyApp
 
         private async Task OnRequest(object sender, SessionEventArgs e)
         {
-            // Read request body
+            // Check for Mock Rules first
+            if (MockRulesManager.Rules != null)
+            {
+                var mockRule = MockRulesManager.Rules.FirstOrDefault(r => r.IsEnabled && e.HttpClient.Request.Url.IndexOf(r.UrlMatch, StringComparison.OrdinalIgnoreCase) >= 0);
+                if (mockRule != null)
+                {
+                    // Construct mock response
+                    var fakeHeaders = new System.Collections.Generic.Dictionary<string, Titanium.Web.Proxy.Models.HttpHeader>();
+                    fakeHeaders.Add("Content-Type", new Titanium.Web.Proxy.Models.HttpHeader("Content-Type", mockRule.ContentType));
+                    
+                    e.GenericResponse(
+                        mockRule.ResponseBody ?? "", 
+                        (System.Net.HttpStatusCode)mockRule.StatusCode, 
+                        fakeHeaders);
+                        
+                    // Short-circuit: we don't proceed to read request or contact the server
+                    return;
+                }
+            }
+
+            // Read request body for normal requests
             if (e.HttpClient.Request.HasBody)
             {
                 await e.GetRequestBodyAsString();

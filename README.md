@@ -28,6 +28,9 @@ This application is **Portable** and does not require an installation wizard or 
 
 ## What's New (Changelog)
 
+### v2.0.0
+- **Auto-Responder (Mocking):** Create mock rules to intercept outgoing requests based on their URL, and instantly return a fake response directly from the proxy! This enables offline development, simulates edge-case server errors (e.g., 500 Internal Server Error), and allows manipulating payloads on the fly without touching the real server backend.
+
 ### v1.9.1
 - **Granular Save/Load:** You can now save individual or multi-selected sessions via the right-click context menu. Loading sessions now intelligently prompts whether to append to the existing list or clear it first.
 
