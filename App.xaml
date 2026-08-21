@@ -9,7 +9,7 @@
                 <ResourceDictionary Source="Themes/LightTheme.xaml"/>
             </ResourceDictionary.MergedDictionaries>
             
-            <Style TargetType="Button">
+            <Style x:Key="AppButtonStyle" TargetType="Button">
                 <Setter Property="Background" Value="{DynamicResource PanelBg}"/>
                 <Setter Property="Foreground" Value="{DynamicResource TextFg}"/>
                 <Setter Property="BorderBrush" Value="{DynamicResource BorderColor}"/>

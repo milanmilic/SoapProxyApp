@@ -21,9 +21,10 @@
         </DataGrid>
 
         <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,10,0,0">
-            <Button Content="➕ Add New Rule" Width="120" Height="30" Margin="0,0,10,0" Click="BtnAdd_Click"/>
-            <Button Content="✏️ Edit Selected" Width="120" Height="30" Margin="0,0,10,0" Click="BtnEdit_Click"/>
-            <Button Content="🗑 Delete Selected" Width="120" Height="30" Click="BtnDelete_Click" Foreground="Red"/>
+            <Button Style="{DynamicResource AppButtonStyle}" Content="➕ Add New Rule" Width="120" Height="30" Margin="0,0,10,0" Click="BtnAdd_Click"/>
+            <Button Style="{DynamicResource AppButtonStyle}" Content="✏️ Edit Selected" Width="120" Height="30" Margin="0,0,10,0" Click="BtnEdit_Click"/>
+            <Button Style="{DynamicResource AppButtonStyle}" Content="🗑 Delete Selected" Width="120" Height="30" Click="BtnDelete_Click" Foreground="Red"/>
         </StackPanel>
     </Grid>
 </Window>
+

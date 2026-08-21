@@ -34,8 +34,9 @@
         <avalonedit:TextEditor Name="TxtResponseBody" Grid.Row="3" Margin="0,25,0,10" FontFamily="Consolas" FontSize="14" ShowLineNumbers="True" Background="{DynamicResource PanelBg}" Foreground="{DynamicResource TextFg}" BorderBrush="{DynamicResource BorderColor}" BorderThickness="1"/>
 
         <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Content="Cancel" Width="100" Height="30" Margin="0,0,10,0" Click="BtnCancel_Click"/>
-            <Button Content="Save Rule" Width="100" Height="30" FontWeight="Bold" Click="BtnSave_Click"/>
+            <Button Style="{DynamicResource AppButtonStyle}" Content="Cancel" Width="100" Height="30" Margin="0,0,10,0" Click="BtnCancel_Click"/>
+            <Button Style="{DynamicResource AppButtonStyle}" Content="Save Rule" Width="100" Height="30" FontWeight="Bold" Click="BtnSave_Click"/>
         </StackPanel>
     </Grid>
 </Window>
+

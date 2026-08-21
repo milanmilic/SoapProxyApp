@@ -34,8 +34,9 @@
 
         <!-- Action -->
         <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Name="BtnCancel" Content="Cancel" Width="80" Height="30" Margin="0,0,10,0" Click="BtnCancel_Click"/>
-            <Button Name="BtnSend" Content="Send Request" Width="120" Height="30" FontWeight="Bold" Background="#4CAF50" Foreground="White" BorderThickness="0" Click="BtnSend_Click"/>
+            <Button Style="{DynamicResource AppButtonStyle}" Name="BtnCancel" Content="Cancel" Width="80" Height="30" Margin="0,0,10,0" Click="BtnCancel_Click"/>
+            <Button Style="{DynamicResource AppButtonStyle}" Name="BtnSend" Content="Send Request" Width="120" Height="30" FontWeight="Bold" Background="#4CAF50" Foreground="White" BorderThickness="0" Click="BtnSend_Click"/>
         </StackPanel>
     </Grid>
 </Window>
+
