@@ -304,7 +304,16 @@ namespace SoapProxyApp
             {
                 if (int.TryParse(TxtPort.Text, out int port))
                 {
-                    var replayWindow = new ReplayWindow(session.Method, session.Url, session.RequestHeaders, session.RequestBody, port)
+                    var replayWindow = new ReplayWindow(session.Method, session.Url, session.RequestHeaders, session.RequestBody, port, (captured) =>
+                    {
+                        Dispatcher.Invoke(() =>
+                        {
+                            Sessions.Add(captured);
+                            // Scroll to the new item
+                            LstSessions.ScrollIntoView(captured);
+                            LstSessions.SelectedItem = captured;
+                        });
+                    })
                     {
                         Owner = this
                     };

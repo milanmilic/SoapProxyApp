@@ -10,11 +10,13 @@ namespace SoapProxyApp
     public partial class ReplayWindow : Window
     {
         private readonly int proxyPort;
+        private readonly Action<CapturedSession> onComplete;
 
-        public ReplayWindow(string method, string url, string headers, string body, int currentProxyPort)
+        public ReplayWindow(string method, string url, string headers, string body, int currentProxyPort, Action<CapturedSession> onCompleteCallback)
         {
             InitializeComponent();
             proxyPort = currentProxyPort;
+            onComplete = onCompleteCallback;
 
             TxtMethod.Text = method;
             TxtUrl.Text = url;
@@ -63,12 +65,10 @@ namespace SoapProxyApp
 
             try
             {
-                // Configure HttpClient to route through our own proxy
+                // We use HttpClient directly, bypassing the proxy because Titanium ignores requests from its own process!
                 var handler = new HttpClientHandler
                 {
-                    Proxy = new System.Net.WebProxy($"http://127.0.0.1:{proxyPort}") { BypassProxyOnLocal = false },
-                    UseProxy = true,
-                    // Ignore certificate errors since our proxy uses a self-signed root
+                    UseProxy = false, // Direct connection to target
                     ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true 
                 };
 
@@ -78,8 +78,6 @@ namespace SoapProxyApp
 
                     // Parse Headers
                     string[] headerLines = TxtHeaders.Text.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-                    
-                    // We must separate Content headers from Request headers
                     var contentHeaders = new System.Collections.Generic.Dictionary<string, string>();
 
                     foreach (var line in headerLines)
@@ -90,44 +88,55 @@ namespace SoapProxyApp
                             string key = line.Substring(0, colonIdx).Trim();
                             string val = line.Substring(colonIdx + 1).Trim();
 
-                            // HttpClient is strict: content headers must be added to HttpContent, not HttpRequestMessage
                             if (key.StartsWith("Content-", StringComparison.OrdinalIgnoreCase))
-                            {
                                 contentHeaders[key] = val;
-                            }
                             else
                             {
-                                // Skip host header, HttpClient sets it automatically from URL
                                 if (key.Equals("Host", StringComparison.OrdinalIgnoreCase)) continue;
-                                // Skip chunked encoding headers
                                 if (key.Equals("Transfer-Encoding", StringComparison.OrdinalIgnoreCase)) continue;
-
                                 request.Headers.TryAddWithoutValidation(key, val);
                             }
                         }
                     }
 
-                    // Attach Body if POST/PUT/etc
+                    byte[] reqBytes = null;
                     if (!string.IsNullOrWhiteSpace(TxtBody.Text))
                     {
-                        // We use the exact raw text. Default to UTF8.
-                        request.Content = new StringContent(TxtBody.Text, Encoding.UTF8);
-
-                        // Apply the exact Content-Type if it was present
+                        reqBytes = Encoding.UTF8.GetBytes(TxtBody.Text);
+                        request.Content = new ByteArrayContent(reqBytes);
                         if (contentHeaders.TryGetValue("Content-Type", out string contentType))
-                        {
                             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse(contentType);
-                        }
-                        
-                        // We don't manually set Content-Length because StringContent does it automatically,
-                        // and forcing it can cause exceptions in HttpClient.
                     }
 
-                    // Send the request (fire and forget from the UI perspective, as the proxy will catch it)
-                    _ = await client.SendAsync(request);
+                    var response = await client.SendAsync(request);
+                    byte[] resBytes = await response.Content.ReadAsByteArrayAsync();
+                    string resString = Encoding.UTF8.GetString(resBytes);
+
+                    var resHeaders = string.Join(Environment.NewLine, response.Headers.Select(h => $"{h.Key}: {string.Join(", ", h.Value)}"));
+                    if (response.Content.Headers.Any())
+                    {
+                        resHeaders += Environment.NewLine + string.Join(Environment.NewLine, response.Content.Headers.Select(h => $"{h.Key}: {string.Join(", ", h.Value)}"));
+                    }
+
+                    var captured = new CapturedSession
+                    {
+                        Url = TxtUrl.Text.Trim(),
+                        Method = TxtMethod.Text.Trim(),
+                        StatusCode = (int)response.StatusCode,
+                        RequestHeaders = TxtHeaders.Text,
+                        RequestBody = TxtBody.Text,
+                        RequestBodyBytes = reqBytes,
+                        ResponseHeaders = resHeaders.Trim(),
+                        ResponseBody = resString,
+                        ResponseBodyBytes = resBytes,
+                        ProcessName = "SoapProxyApp (Replay)",
+                        Timestamp = DateTime.Now
+                    };
+
+                    onComplete?.Invoke(captured);
                 }
                 
-                Close(); // Close the window after sending
+                Close();
             }
             catch (Exception ex)
             {
