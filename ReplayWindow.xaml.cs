@@ -69,7 +69,8 @@ namespace SoapProxyApp
                 var handler = new HttpClientHandler
                 {
                     UseProxy = false, // Direct connection to target
-                    ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true 
+                    ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true,
+                    AutomaticDecompression = System.Net.DecompressionMethods.GZip | System.Net.DecompressionMethods.Deflate | System.Net.DecompressionMethods.Brotli | System.Net.DecompressionMethods.None
                 };
 
                 using (var client = new HttpClient(handler))
@@ -94,6 +95,7 @@ namespace SoapProxyApp
                             {
                                 if (key.Equals("Host", StringComparison.OrdinalIgnoreCase)) continue;
                                 if (key.Equals("Transfer-Encoding", StringComparison.OrdinalIgnoreCase)) continue;
+                                if (key.Equals("Accept-Encoding", StringComparison.OrdinalIgnoreCase)) continue;
                                 request.Headers.TryAddWithoutValidation(key, val);
                             }
                         }
