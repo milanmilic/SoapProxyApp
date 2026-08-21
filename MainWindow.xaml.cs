@@ -73,20 +73,29 @@ namespace SoapProxyApp
                     string latestVersion = json["tag_name"]?.ToString();
                     string downloadUrl = json["html_url"]?.ToString();
 
-                    if (!string.IsNullOrEmpty(latestVersion) && latestVersion != AppVersion)
+                    if (!string.IsNullOrEmpty(latestVersion))
                     {
-                        Dispatcher.Invoke(() =>
+                        string cleanLatest = latestVersion.TrimStart('v', 'V');
+                        string cleanCurrent = AppVersion.TrimStart('v', 'V');
+
+                        if (Version.TryParse(cleanLatest, out Version vLatest) && Version.TryParse(cleanCurrent, out Version vCurrent))
                         {
-                            var result = MessageBox.Show($"A new version of SOAP Proxy App ({latestVersion}) is available!\n\nWould you like to download it now?", "Update Available", MessageBoxButton.YesNo, MessageBoxImage.Information);
-                            if (result == MessageBoxResult.Yes && !string.IsNullOrEmpty(downloadUrl))
+                            if (vLatest > vCurrent)
                             {
-                                Process.Start(new ProcessStartInfo
+                                Dispatcher.Invoke(() =>
                                 {
-                                    FileName = downloadUrl,
-                                    UseShellExecute = true
+                                    var result = MessageBox.Show($"A new version of SOAP Proxy App ({latestVersion}) is available!\n\nWould you like to download it now?", "Update Available", MessageBoxButton.YesNo, MessageBoxImage.Information);
+                                    if (result == MessageBoxResult.Yes && !string.IsNullOrEmpty(downloadUrl))
+                                    {
+                                        Process.Start(new ProcessStartInfo
+                                        {
+                                            FileName = downloadUrl,
+                                            UseShellExecute = true
+                                        });
+                                    }
                                 });
                             }
-                        });
+                        }
                     }
                 }
             }
