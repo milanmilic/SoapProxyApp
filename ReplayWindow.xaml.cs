@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Windows;
+using ICSharpCode.AvalonEdit.Search;
 
 namespace SoapProxyApp
 {
@@ -22,6 +23,8 @@ namespace SoapProxyApp
             TxtUrl.Text = url;
             TxtHeaders.Text = headers;
             
+            SearchPanel.Install(TxtBody);
+
             // Try to set syntax highlighting and format body based on headers
             if (headers?.ToLower().Contains("xml") == true || headers?.ToLower().Contains("soap") == true)
             {

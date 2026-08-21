@@ -1,6 +1,7 @@
 using System;
 using System.Windows;
 using ICSharpCode.AvalonEdit.Highlighting;
+using ICSharpCode.AvalonEdit.Search;
 
 namespace SoapProxyApp
 {
@@ -11,6 +12,7 @@ namespace SoapProxyApp
         public MockRuleEditorWindow(MockRule existingRule = null)
         {
             InitializeComponent();
+            SearchPanel.Install(TxtResponseBody);
             
             if (existingRule != null)
             {

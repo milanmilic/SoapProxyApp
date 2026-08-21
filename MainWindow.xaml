@@ -11,7 +11,6 @@
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="Background" Value="{DynamicResource EditorBg}"/>
             <Setter Property="Foreground" Value="{DynamicResource EditorFg}"/>
-            <Setter Property="IsReadOnly" Value="True"/>
             <Setter Property="TextWrapping" Value="Wrap"/>
             <Setter Property="VerticalScrollBarVisibility" Value="Auto"/>
             <Setter Property="BorderThickness" Value="0"/>
@@ -173,7 +172,7 @@
                         <Button Name="BtnExportReq" Content="💾 Export" Grid.Row="0" HorizontalAlignment="Right" Padding="15,3" Margin="0,0,0,5" Click="BtnExportReq_Click" Background="#2196F3" Foreground="White" BorderThickness="0" FontWeight="Bold" Cursor="Hand"/>
                         <TabControl Name="ReqTabs" Grid.Row="1" Margin="0" FontWeight="Normal" SelectionChanged="ReqTabs_SelectionChanged" Background="{DynamicResource PanelBg}" BorderBrush="{DynamicResource BorderColor}">
                             <TabItem Header="Headers">
-                                <TextBox Name="TxtReqHeaders" />
+                                <TextBox Name="TxtReqHeaders" IsReadOnly="True" />
                             </TabItem>
                             <TabItem Header="Raw">
                                 <avalonEdit:TextEditor Name="TxtReqRaw" />
@@ -209,7 +208,7 @@
                         <Button Name="BtnExportRes" Content="💾 Export" Grid.Row="0" HorizontalAlignment="Right" Padding="15,3" Margin="0,0,0,2" Click="BtnExportRes_Click" Background="#2196F3" Foreground="White" BorderThickness="0" FontWeight="Bold" Cursor="Hand"/>
                         <TabControl Name="ResTabs" Grid.Row="1" Margin="0" FontWeight="Normal" SelectionChanged="ResTabs_SelectionChanged" Background="{DynamicResource PanelBg}" BorderBrush="{DynamicResource BorderColor}">
                             <TabItem Header="Headers">
-                                <TextBox Name="TxtResHeaders" />
+                                <TextBox Name="TxtResHeaders" IsReadOnly="True" />
                             </TabItem>
                             <TabItem Header="Raw">
                                 <avalonEdit:TextEditor Name="TxtResRaw" />
