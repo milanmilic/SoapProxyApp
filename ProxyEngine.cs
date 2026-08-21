@@ -66,8 +66,11 @@ namespace SoapProxyApp
                     var fakeHeaders = new System.Collections.Generic.Dictionary<string, Titanium.Web.Proxy.Models.HttpHeader>();
                     fakeHeaders.Add("Content-Type", new Titanium.Web.Proxy.Models.HttpHeader("Content-Type", mockRule.ContentType));
                     
+                    byte[] mockBytes = System.Text.Encoding.UTF8.GetBytes(mockRule.ResponseBody ?? "");
+                    fakeHeaders.Add("Content-Length", new Titanium.Web.Proxy.Models.HttpHeader("Content-Length", mockBytes.Length.ToString()));
+
                     e.GenericResponse(
-                        mockRule.ResponseBody ?? "", 
+                        mockBytes, 
                         (System.Net.HttpStatusCode)mockRule.StatusCode, 
                         fakeHeaders);
                         
