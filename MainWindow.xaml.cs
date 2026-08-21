@@ -34,7 +34,8 @@ namespace SoapProxyApp
 
         private XmlFoldingStrategy xmlFoldingStrategy = new XmlFoldingStrategy();
         private BraceFoldingStrategy jsonFoldingStrategy = new BraceFoldingStrategy();
-        public const string AppVersion = "v1.5.0";
+        
+        public static readonly string AppVersion = "v" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString(3);
 
         public MainWindow()
         {
