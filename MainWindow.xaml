@@ -82,7 +82,7 @@
                                 </Style>
                             </TextBlock.Style>
                         </TextBlock>
-                        <TextBox Name="TxtFilter" Background="Transparent" Foreground="{DynamicResource TextFg}" BorderThickness="0" Padding="5" TextChanged="TxtFilter_TextChanged"/>
+                        <TextBox Name="TxtFilter" Background="Transparent" Foreground="{DynamicResource TextFg}" BorderThickness="0" Padding="5" IsReadOnly="False" TextChanged="TxtFilter_TextChanged"/>
                     </Grid>
                 </Border>
 
