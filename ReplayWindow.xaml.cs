@@ -19,17 +19,36 @@ namespace SoapProxyApp
             TxtMethod.Text = method;
             TxtUrl.Text = url;
             TxtHeaders.Text = headers;
-            TxtBody.Text = body;
             
-            // Try to set syntax highlighting based on headers
+            // Try to set syntax highlighting and format body based on headers
             if (headers?.ToLower().Contains("xml") == true || headers?.ToLower().Contains("soap") == true)
             {
                 TxtBody.SyntaxHighlighting = ICSharpCode.AvalonEdit.Highlighting.HighlightingManager.Instance.GetDefinition("XML");
+                TxtBody.Text = FormatXml(body);
             }
             else if (headers?.ToLower().Contains("json") == true)
             {
                 TxtBody.SyntaxHighlighting = ICSharpCode.AvalonEdit.Highlighting.HighlightingManager.Instance.GetDefinition("JavaScript");
+                TxtBody.Text = FormatJson(body);
             }
+            else
+            {
+                TxtBody.Text = body;
+            }
+        }
+
+        private string FormatXml(string xml)
+        {
+            if (string.IsNullOrWhiteSpace(xml)) return "";
+            try { return System.Xml.Linq.XDocument.Parse(xml).ToString(); }
+            catch { return xml; }
+        }
+
+        private string FormatJson(string json)
+        {
+            if (string.IsNullOrWhiteSpace(json)) return "";
+            try { return Newtonsoft.Json.Linq.JToken.Parse(json).ToString(Newtonsoft.Json.Formatting.Indented); }
+            catch { return json; }
         }
 
         private void BtnCancel_Click(object sender, RoutedEventArgs e)
@@ -47,7 +66,7 @@ namespace SoapProxyApp
                 // Configure HttpClient to route through our own proxy
                 var handler = new HttpClientHandler
                 {
-                    Proxy = new System.Net.WebProxy($"http://127.0.0.1:{proxyPort}"),
+                    Proxy = new System.Net.WebProxy($"http://127.0.0.1:{proxyPort}") { BypassProxyOnLocal = false },
                     UseProxy = true,
                     // Ignore certificate errors since our proxy uses a self-signed root
                     ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true 
