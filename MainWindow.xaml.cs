@@ -11,6 +11,7 @@ using Microsoft.Win32;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Net.Http;
+using System.Linq;
 using ICSharpCode.AvalonEdit.Highlighting;
 using ICSharpCode.AvalonEdit.Highlighting.Xshd;
 using ICSharpCode.AvalonEdit.Folding;
@@ -394,9 +395,31 @@ namespace SoapProxyApp
                 TxtResXmlFormatted.Text = "";
                 TxtResJson.Text = ""; 
 
+                ReqTabs.SelectedIndex = GetBestTabIndex(session.RequestHeaders, session.RequestBodyBytes);
+                ResTabs.SelectedIndex = GetBestTabIndex(session.ResponseHeaders, session.ResponseBodyBytes);
+
                 RefreshReqTab();
                 RefreshResTab();
             }
+        }
+
+        private int GetBestTabIndex(string headers, byte[] bodyBytes)
+        {
+            if (bodyBytes == null || bodyBytes.Length == 0) return 0; // Headers
+            if (string.IsNullOrWhiteSpace(headers)) return 1; // Raw
+
+            string[] lines = headers.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            string contentType = lines.FirstOrDefault(l => l.StartsWith("Content-Type:", StringComparison.OrdinalIgnoreCase))?.ToLower();
+
+            if (!string.IsNullOrEmpty(contentType))
+            {
+                if (contentType.Contains("image/")) return 3; // Image
+                if (contentType.Contains("html")) return 2;   // HTML
+                if (contentType.Contains("json")) return 5;   // JSON
+                if (contentType.Contains("xml") || contentType.Contains("soap")) return 4; // XML
+            }
+
+            return 1; // Raw
         }
 
         private void ReqTabs_SelectionChanged(object sender, SelectionChangedEventArgs e)
