@@ -110,6 +110,30 @@ namespace SoapProxyApp
                             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse(contentType);
                     }
 
+                    // CHECK MOCK RULES FIRST
+                    var mockRule = MockRulesManager.Rules?.FirstOrDefault(r => r.IsEnabled && TxtUrl.Text.IndexOf(r.UrlMatch, StringComparison.OrdinalIgnoreCase) >= 0);
+                    if (mockRule != null)
+                    {
+                        var capturedMock = new CapturedSession
+                        {
+                            Url = TxtUrl.Text.Trim(),
+                            Method = TxtMethod.Text.Trim(),
+                            StatusCode = mockRule.StatusCode,
+                            RequestHeaders = TxtHeaders.Text,
+                            RequestBody = TxtBody.Text,
+                            RequestBodyBytes = reqBytes,
+                            ResponseHeaders = $"Content-Type: {mockRule.ContentType}",
+                            ResponseBody = mockRule.ResponseBody ?? "",
+                            ResponseBodyBytes = Encoding.UTF8.GetBytes(mockRule.ResponseBody ?? ""),
+                            ProcessName = "SoapProxyApp (Replay Mocked)",
+                            Timestamp = DateTime.Now
+                        };
+
+                        onComplete?.Invoke(capturedMock);
+                        Close();
+                        return;
+                    }
+
                     var response = await client.SendAsync(request);
                     byte[] resBytes = await response.Content.ReadAsByteArrayAsync();
                     string resString = Encoding.UTF8.GetString(resBytes);

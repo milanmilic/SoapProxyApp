@@ -17,6 +17,7 @@ using System.Linq;
 using ICSharpCode.AvalonEdit.Highlighting;
 using ICSharpCode.AvalonEdit.Highlighting.Xshd;
 using ICSharpCode.AvalonEdit.Folding;
+using ICSharpCode.AvalonEdit.Search;
 
 namespace SoapProxyApp
 {
@@ -63,6 +64,11 @@ namespace SoapProxyApp
             resXmlFoldingManager = FoldingManager.Install(TxtResXmlFormatted.TextArea);
             reqJsonFoldingManager = FoldingManager.Install(TxtReqJson.TextArea);
             resJsonFoldingManager = FoldingManager.Install(TxtResJson.TextArea);
+
+            SearchPanel.Install(TxtReqXmlFormatted);
+            SearchPanel.Install(TxtReqJson);
+            SearchPanel.Install(TxtResXmlFormatted);
+            SearchPanel.Install(TxtResJson);
 
             _ = CheckForUpdatesAsync();
         }
