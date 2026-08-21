@@ -36,17 +36,21 @@
 
         <!-- Top Bar -->
         <Border Grid.Row="0" Background="{DynamicResource HeaderBg}" BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,0,0,1">
-            <StackPanel Orientation="Horizontal" Margin="10,0" VerticalAlignment="Center">
-                <TextBlock Text="Port:" VerticalAlignment="Center" Margin="0,0,5,0" FontWeight="Bold" Foreground="{DynamicResource TextFg}"/>
-                <TextBox Name="TxtPort" Text="8899" Width="60" Padding="2" Background="{DynamicResource PanelBg}" Foreground="{DynamicResource TextFg}" IsReadOnly="False" BorderThickness="1" BorderBrush="{DynamicResource BorderColor}" Margin="0,0,15,0" VerticalAlignment="Center"/>
-                <Button Name="BtnStart" Content="Start Proxy" Width="100" Height="30" Margin="0,0,10,0" Click="BtnStart_Click" FontWeight="Bold"/>
-                <Button Name="BtnStop" Content="Stop Proxy" Width="100" Height="30" IsEnabled="False" Click="BtnStop_Click"/>
-                <Button Name="BtnClear" Content="🗑 Clear All" Width="90" Height="30" Margin="10,0,0,0" Click="BtnClear_Click" Background="#FF9800" Foreground="White" BorderThickness="0" FontWeight="Bold"/>
-                <Button Name="BtnExportCert" Content="Install Cert" ToolTip="Installs to Local Machine (Requires Admin)" Width="100" Height="30" Margin="10,0,0,0" Click="BtnExportCert_Click"/>
+            <Grid Margin="10,0">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="Port:" VerticalAlignment="Center" Margin="0,0,5,0" FontWeight="Bold" Foreground="{DynamicResource TextFg}"/>
+                    <TextBox Name="TxtPort" Text="8899" Width="60" Padding="2" Background="{DynamicResource PanelBg}" Foreground="{DynamicResource TextFg}" IsReadOnly="False" BorderThickness="1" BorderBrush="{DynamicResource BorderColor}" Margin="0,0,15,0" VerticalAlignment="Center"/>
+                    <Button Name="BtnStart" Content="Start Proxy" Width="100" Height="30" Margin="0,0,10,0" Click="BtnStart_Click" FontWeight="Bold"/>
+                    <Button Name="BtnStop" Content="Stop Proxy" Width="100" Height="30" IsEnabled="False" Click="BtnStop_Click"/>
+                    <Button Name="BtnClear" Content="🗑 Clear All" Width="90" Height="30" Margin="10,0,0,0" Click="BtnClear_Click" Background="#FF9800" Foreground="White" BorderThickness="0" FontWeight="Bold"/>
+                    <Button Name="BtnExportCert" Content="Install Cert" ToolTip="Installs to Local Machine (Requires Admin)" Width="100" Height="30" Margin="10,0,0,0" Click="BtnExportCert_Click"/>
+                    
+                    <Button Name="BtnTheme" Content="🌙 Dark Mode" Width="110" Height="30" Margin="15,0,0,0" Click="BtnTheme_Click"/>
+                    <TextBlock Name="TxtStatus" Text="Proxy is stopped." VerticalAlignment="Center" Margin="20,0,0,0" FontWeight="Bold" Foreground="#D32F2F"/>
+                </StackPanel>
                 
-                <Button Name="BtnTheme" Content="🌙 Dark Mode" Width="110" Height="30" Margin="15,0,0,0" Click="BtnTheme_Click"/>
-                <TextBlock Name="TxtStatus" Text="Proxy is stopped." VerticalAlignment="Center" Margin="20,0,0,0" FontWeight="Bold" Foreground="#D32F2F"/>
-            </StackPanel>
+                <TextBlock Name="TxtVersion" Text="v1.5.0" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="{DynamicResource TextFg}" Opacity="0.5" FontWeight="SemiBold" FontSize="11" />
+            </Grid>
         </Border>
 
         <Grid Grid.Row="1">

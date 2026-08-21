@@ -9,6 +9,8 @@ using System.Xml.Linq;
 using System.Windows.Media.Imaging;
 using Microsoft.Win32;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System.Net.Http;
 using ICSharpCode.AvalonEdit.Highlighting;
 using ICSharpCode.AvalonEdit.Highlighting.Xshd;
 using ICSharpCode.AvalonEdit.Folding;
@@ -32,13 +34,15 @@ namespace SoapProxyApp
 
         private XmlFoldingStrategy xmlFoldingStrategy = new XmlFoldingStrategy();
         private BraceFoldingStrategy jsonFoldingStrategy = new BraceFoldingStrategy();
+        public const string AppVersion = "v1.5.0";
 
         public MainWindow()
         {
             InitializeComponent();
             Sessions = new ObservableCollection<CapturedSession>();
             LstSessions.ItemsSource = Sessions;
-            
+            TxtVersion.Text = AppVersion;
+
             proxyEngine = new ProxyEngine();
             proxyEngine.OnSessionCompleted += ProxyEngine_OnSessionCompleted;
 
@@ -53,6 +57,40 @@ namespace SoapProxyApp
             resXmlFoldingManager = FoldingManager.Install(TxtResXmlFormatted.TextArea);
             reqJsonFoldingManager = FoldingManager.Install(TxtReqJson.TextArea);
             resJsonFoldingManager = FoldingManager.Install(TxtResJson.TextArea);
+
+            _ = CheckForUpdatesAsync();
+        }
+
+        private async System.Threading.Tasks.Task CheckForUpdatesAsync()
+        {
+            try
+            {
+                using (var client = new HttpClient())
+                {
+                    client.DefaultRequestHeaders.Add("User-Agent", "SoapProxyApp-Updater");
+                    string response = await client.GetStringAsync("https://api.github.com/repos/milanmilic/SoapProxyApp/releases/latest");
+                    var json = JObject.Parse(response);
+                    string latestVersion = json["tag_name"]?.ToString();
+                    string downloadUrl = json["html_url"]?.ToString();
+
+                    if (!string.IsNullOrEmpty(latestVersion) && latestVersion != AppVersion)
+                    {
+                        Dispatcher.Invoke(() =>
+                        {
+                            var result = MessageBox.Show($"A new version of SOAP Proxy App ({latestVersion}) is available!\n\nWould you like to download it now?", "Update Available", MessageBoxButton.YesNo, MessageBoxImage.Information);
+                            if (result == MessageBoxResult.Yes && !string.IsNullOrEmpty(downloadUrl))
+                            {
+                                Process.Start(new ProcessStartInfo
+                                {
+                                    FileName = downloadUrl,
+                                    UseShellExecute = true
+                                });
+                            }
+                        });
+                    }
+                }
+            }
+            catch { /* Ignore update check failures silently */ }
         }
 
         private void LoadSyntaxDefinitions()
