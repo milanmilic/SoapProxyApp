@@ -10,8 +10,10 @@ namespace SoapProxyApp
         public int StatusCode { get; set; }
         public string RequestHeaders { get; set; }
         public string RequestBody { get; set; }
+        public byte[] RequestBodyBytes { get; set; }
         public string ResponseHeaders { get; set; }
         public string ResponseBody { get; set; }
+        public byte[] ResponseBodyBytes { get; set; }
         public DateTime Timestamp { get; set; } = DateTime.Now;
         public string SoapAction { get; set; }
         public string ProcessName { get; set; }

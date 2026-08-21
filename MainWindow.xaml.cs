@@ -382,11 +382,15 @@ namespace SoapProxyApp
 
                 TxtReqHeaders.Text = session.RequestHeaders;
                 TxtReqRaw.Text = session.RequestBody;
+                TxtReqHtml.Text = "";
+                ImgReqImage.Source = null;
                 TxtReqXmlFormatted.Text = ""; 
                 TxtReqJson.Text = ""; 
 
                 TxtResHeaders.Text = session.ResponseHeaders;
                 TxtResRaw.Text = session.ResponseBody;
+                TxtResHtml.Text = "";
+                ImgResImage.Source = null;
                 TxtResXmlFormatted.Text = "";
                 TxtResJson.Text = ""; 
 
@@ -416,8 +420,9 @@ namespace SoapProxyApp
             {
                 case 0: content = TxtReqHeaders.Text; break;
                 case 1: content = TxtReqRaw.Text; ext = "xml"; filter = "XML files (*.xml)|*.xml|All files (*.*)|*.*"; break;
-                case 2: content = TxtReqXmlFormatted.Text; ext = "xml"; filter = "XML files (*.xml)|*.xml|All files (*.*)|*.*"; break;
-                case 3: content = TxtReqJson.Text; ext = "json"; filter = "JSON files (*.json)|*.json|All files (*.*)|*.*"; break;
+                case 2: content = TxtReqHtml.Text; ext = "html"; filter = "HTML files (*.html)|*.html|All files (*.*)|*.*"; break;
+                case 4: content = TxtReqXmlFormatted.Text; ext = "xml"; filter = "XML files (*.xml)|*.xml|All files (*.*)|*.*"; break;
+                case 5: content = TxtReqJson.Text; ext = "json"; filter = "JSON files (*.json)|*.json|All files (*.*)|*.*"; break;
             }
             DoExport(content, ext, filter, "Request");
         }
@@ -433,8 +438,9 @@ namespace SoapProxyApp
             {
                 case 0: content = TxtResHeaders.Text; break;
                 case 1: content = TxtResRaw.Text; ext = "xml"; filter = "XML files (*.xml)|*.xml|All files (*.*)|*.*"; break;
-                case 2: content = TxtResXmlFormatted.Text; ext = "xml"; filter = "XML files (*.xml)|*.xml|All files (*.*)|*.*"; break;
-                case 3: content = TxtResJson.Text; ext = "json"; filter = "JSON files (*.json)|*.json|All files (*.*)|*.*"; break;
+                case 2: content = TxtResHtml.Text; ext = "html"; filter = "HTML files (*.html)|*.html|All files (*.*)|*.*"; break;
+                case 4: content = TxtResXmlFormatted.Text; ext = "xml"; filter = "XML files (*.xml)|*.xml|All files (*.*)|*.*"; break;
+                case 5: content = TxtResJson.Text; ext = "json"; filter = "JSON files (*.json)|*.json|All files (*.*)|*.*"; break;
             }
             DoExport(content, ext, filter, "Response");
         }
@@ -471,12 +477,20 @@ namespace SoapProxyApp
         {
             if (LstSessions.SelectedItem is CapturedSession session && ReqTabs != null)
             {
-                if (ReqTabs.SelectedIndex == 2 && string.IsNullOrEmpty(TxtReqXmlFormatted.Text))
+                if (ReqTabs.SelectedIndex == 2 && string.IsNullOrEmpty(TxtReqHtml.Text))
+                {
+                    TxtReqHtml.Text = session.RequestBody ?? "";
+                }
+                else if (ReqTabs.SelectedIndex == 3 && ImgReqImage.Source == null && session.RequestBodyBytes != null)
+                {
+                    ImgReqImage.Source = LoadImage(session.RequestBodyBytes);
+                }
+                else if (ReqTabs.SelectedIndex == 4 && string.IsNullOrEmpty(TxtReqXmlFormatted.Text))
                 {
                     TxtReqXmlFormatted.Text = FormatXml(session.RequestBody);
                     xmlFoldingStrategy.UpdateFoldings(reqXmlFoldingManager, TxtReqXmlFormatted.Document);
                 }
-                else if (ReqTabs.SelectedIndex == 3 && string.IsNullOrEmpty(TxtReqJson.Text))
+                else if (ReqTabs.SelectedIndex == 5 && string.IsNullOrEmpty(TxtReqJson.Text))
                 {
                     TxtReqJson.Text = ConvertXmlToJson(session.RequestBody);
                     jsonFoldingStrategy.UpdateFoldings(reqJsonFoldingManager, TxtReqJson.Document);
@@ -488,16 +502,49 @@ namespace SoapProxyApp
         {
             if (LstSessions.SelectedItem is CapturedSession session && ResTabs != null)
             {
-                if (ResTabs.SelectedIndex == 2 && string.IsNullOrEmpty(TxtResXmlFormatted.Text))
+                if (ResTabs.SelectedIndex == 2 && string.IsNullOrEmpty(TxtResHtml.Text))
+                {
+                    TxtResHtml.Text = session.ResponseBody ?? "";
+                }
+                else if (ResTabs.SelectedIndex == 3 && ImgResImage.Source == null && session.ResponseBodyBytes != null)
+                {
+                    ImgResImage.Source = LoadImage(session.ResponseBodyBytes);
+                }
+                else if (ResTabs.SelectedIndex == 4 && string.IsNullOrEmpty(TxtResXmlFormatted.Text))
                 {
                     TxtResXmlFormatted.Text = FormatXml(session.ResponseBody);
                     xmlFoldingStrategy.UpdateFoldings(resXmlFoldingManager, TxtResXmlFormatted.Document);
                 }
-                else if (ResTabs.SelectedIndex == 3 && string.IsNullOrEmpty(TxtResJson.Text))
+                else if (ResTabs.SelectedIndex == 5 && string.IsNullOrEmpty(TxtResJson.Text))
                 {
                     TxtResJson.Text = ConvertXmlToJson(session.ResponseBody);
                     jsonFoldingStrategy.UpdateFoldings(resJsonFoldingManager, TxtResJson.Document);
                 }
+            }
+        }
+
+        private BitmapImage LoadImage(byte[] imageData)
+        {
+            if (imageData == null || imageData.Length == 0) return null;
+            try
+            {
+                var image = new BitmapImage();
+                using (var mem = new System.IO.MemoryStream(imageData))
+                {
+                    mem.Position = 0;
+                    image.BeginInit();
+                    image.CreateOptions = BitmapCreateOptions.PreservePixelFormat;
+                    image.CacheOption = BitmapCacheOption.OnLoad;
+                    image.UriSource = null;
+                    image.StreamSource = mem;
+                    image.EndInit();
+                }
+                image.Freeze();
+                return image;
+            }
+            catch
+            {
+                return null;
             }
         }
 

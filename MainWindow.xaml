@@ -168,6 +168,14 @@
                             <TabItem Header="Raw">
                                 <avalonEdit:TextEditor Name="TxtReqRaw" />
                             </TabItem>
+                            <TabItem Header="HTML">
+                                <avalonEdit:TextEditor Name="TxtReqHtml" SyntaxHighlighting="HTML" />
+                            </TabItem>
+                            <TabItem Header="Image">
+                                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Background="{DynamicResource EditorBg}">
+                                    <Image Name="ImgReqImage" Stretch="None" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="10" />
+                                </ScrollViewer>
+                            </TabItem>
                             <TabItem Header="Formatted XML">
                                 <avalonEdit:TextEditor Name="TxtReqXmlFormatted" SyntaxHighlighting="XML" />
                             </TabItem>
@@ -195,6 +203,14 @@
                             </TabItem>
                             <TabItem Header="Raw">
                                 <avalonEdit:TextEditor Name="TxtResRaw" />
+                            </TabItem>
+                            <TabItem Header="HTML">
+                                <avalonEdit:TextEditor Name="TxtResHtml" SyntaxHighlighting="HTML" />
+                            </TabItem>
+                            <TabItem Header="Image">
+                                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Background="{DynamicResource EditorBg}">
+                                    <Image Name="ImgResImage" Stretch="None" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="10" />
+                                </ScrollViewer>
                             </TabItem>
                             <TabItem Header="Formatted XML">
                                 <avalonEdit:TextEditor Name="TxtResXmlFormatted" SyntaxHighlighting="XML" />

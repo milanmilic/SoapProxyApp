@@ -115,8 +115,10 @@ namespace SoapProxyApp
                 StatusCode = e.HttpClient.Response.StatusCode,
                 RequestHeaders = string.Join(Environment.NewLine, e.HttpClient.Request.Headers.Select(h => $"{h.Name}: {h.Value}")),
                 RequestBody = e.HttpClient.Request.IsBodyRead ? e.HttpClient.Request.BodyString : "",
+                RequestBodyBytes = e.HttpClient.Request.IsBodyRead ? e.HttpClient.Request.Body : null,
                 ResponseHeaders = string.Join(Environment.NewLine, e.HttpClient.Response.Headers.Select(h => $"{h.Name}: {h.Value}")),
                 ResponseBody = e.HttpClient.Response.IsBodyRead ? e.HttpClient.Response.BodyString : "",
+                ResponseBodyBytes = e.HttpClient.Response.IsBodyRead ? e.HttpClient.Response.Body : null,
                 SoapAction = soapActionHeader?.Value,
                 ProcessName = processName
             };
