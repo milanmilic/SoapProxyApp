@@ -258,7 +258,13 @@ namespace SoapProxyApp
                     var loaded = JsonConvert.DeserializeObject<List<CapturedSession>>(json);
                     if (loaded != null)
                     {
-                        BtnClear_Click(null, null); // Clear existing
+                        if (Sessions.Count > 0)
+                        {
+                            var result = MessageBox.Show("Do you want to clear the current list before loading?", "Clear List", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
+                            if (result == MessageBoxResult.Cancel) return;
+                            if (result == MessageBoxResult.Yes) BtnClear_Click(null, null);
+                        }
+                        
                         foreach (var s in loaded)
                         {
                             Sessions.Add(s);
@@ -271,6 +277,38 @@ namespace SoapProxyApp
                     MessageBox.Show($"Error loading sessions: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
+        }
+
+        private void MenuSaveSelected_Click(object sender, RoutedEventArgs e)
+        {
+            if (LstSessions.SelectedItems.Count == 0) return;
+
+            var dlg = new SaveFileDialog
+            {
+                Filter = "SoapProxy Sessions (*.sps)|*.sps",
+                DefaultExt = ".sps",
+                FileName = $"SelectedSessions_{DateTime.Now:yyyyMMdd_HHmmss}"
+            };
+
+            if (dlg.ShowDialog() == true)
+            {
+                try
+                {
+                    var selected = LstSessions.SelectedItems.Cast<CapturedSession>().ToList();
+                    string json = JsonConvert.SerializeObject(selected, Newtonsoft.Json.Formatting.Indented);
+                    File.WriteAllText(dlg.FileName, json);
+                    MessageBox.Show($"Saved {selected.Count} selected sessions successfully.", "Saved", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error saving sessions: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        private void MenuLoad_Click(object sender, RoutedEventArgs e)
+        {
+            BtnLoad_Click(sender, e);
         }
 
         private void DeleteSelectedSessions()

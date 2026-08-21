@@ -94,6 +94,9 @@
                         <MenuItem Header="Replay / Resend Request" Click="MenuReplay_Click" FontWeight="Bold" />
                         <MenuItem Header="Delete Selected" Click="MenuDelete_Click" Foreground="Red" />
                         <Separator />
+                        <MenuItem Header="💾 Save Selected Session(s)..." Click="MenuSaveSelected_Click" />
+                        <MenuItem Header="📂 Load Session(s)..." Click="MenuLoad_Click" />
+                        <Separator />
                         <MenuItem Header="Compare Requests (VS Code / WinMerge)" Click="MenuCompareReq_Click" />
                         <MenuItem Header="Compare Responses (VS Code / WinMerge)" Click="MenuCompareRes_Click" />
                     </ContextMenu>

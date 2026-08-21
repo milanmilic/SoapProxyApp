@@ -28,6 +28,9 @@ This application is **Portable** and does not require an installation wizard or 
 
 ## What's New (Changelog)
 
+### v1.9.1
+- **Granular Save/Load:** You can now save individual or multi-selected sessions via the right-click context menu. Loading sessions now intelligently prompts whether to append to the existing list or clear it first.
+
 ### v1.9.0
 - **Save & Load Sessions:** Save captured transactions to a `.sps` file and load them later for offline inspection.
 - **Delete Transactions:** Select specific transactions in the list and remove them via the context menu or by pressing the `Delete` key.
