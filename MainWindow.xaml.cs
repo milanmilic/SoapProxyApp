@@ -71,6 +71,27 @@ namespace SoapProxyApp
             SearchPanel.Install(TxtResJson);
 
             _ = CheckForUpdatesAsync();
+            CheckStaleSystemProxy();
+        }
+
+        private void CheckStaleSystemProxy()
+        {
+            if (ProxyEngine.IsSystemProxyConfiguredLocally(out string configuredProxy))
+            {
+                var result = MessageBox.Show(
+                    $"Windows System Proxy is currently configured to '{configuredProxy}'.\n\n" +
+                    "This setting may have been left enabled after a previous session was closed or terminated abruptly.\n\n" +
+                    "Would you like to disable the system proxy now to restore normal direct internet connection?",
+                    "Stale System Proxy Detected",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Question);
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    ProxyEngine.DisableSystemProxySettings();
+                    MessageBox.Show("Windows System Proxy has been disabled. Direct connection restored.", "Proxy Disabled", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
         }
 
         private async System.Threading.Tasks.Task CheckForUpdatesAsync()

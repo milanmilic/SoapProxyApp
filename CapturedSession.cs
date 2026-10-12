@@ -18,7 +18,15 @@ namespace SoapProxyApp
         public string SoapAction { get; set; }
         public string ProcessName { get; set; }
         
-        public long ContentLength => string.IsNullOrEmpty(ResponseBody) ? 0 : System.Text.Encoding.UTF8.GetByteCount(ResponseBody);
+        public long ContentLength
+        {
+            get
+            {
+                if (ResponseBodyBytes != null) return ResponseBodyBytes.LongLength;
+                if (!string.IsNullOrEmpty(ResponseBody)) return System.Text.Encoding.UTF8.GetByteCount(ResponseBody);
+                return 0;
+            }
+        }
 
         public string FormattedLength
         {
@@ -35,7 +43,7 @@ namespace SoapProxyApp
             get
             {
                 if (StatusCode >= 200 && StatusCode < 300) return "Success";
-                if (StatusCode >= 500) return "Error";
+                if (StatusCode >= 500 || StatusCode == 0) return "Error";
                 if (StatusCode >= 400 && StatusCode < 500) return "Warning";
                 return "Neutral";
             }

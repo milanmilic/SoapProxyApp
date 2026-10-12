@@ -33,9 +33,13 @@ This application is **Portable** and does not require an installation wizard or 
 
 ### v2.1.0
 - **Proper JSON Display:** The Formatted JSON tab now pretty-prints real JSON bodies (REST APIs) directly. Previously every body was parsed as XML, so JSON payloads always showed an "Unable to parse content as XML to JSON" error. XML/SOAP bodies are still converted from XML to JSON as before.
+- **Failed Request Diagnostics:** Captures connections that failed upstream (DNS errors, connection refused, timeouts, TLS errors). These are clearly marked in red (`StatusCode: 0`) with detailed error messages in the response body.
+- **WMI & Process Name Caching:** Caches process and IIS AppPool names in memory, eliminating repetitive 50-400ms WMI queries on every request for dramatic throughput improvements.
+- **Stale System Proxy Recovery:** Detects on startup if Windows System Proxy was left enabled (e.g. following an unexpected app crash or termination) pointing to localhost and prompts to restore direct internet connectivity with one click.
 - **JSON-aware Compare:** Comparing two requests/responses now formats JSON as JSON and XML as XML, and saves temporary files with the matching extension (`.json`, `.xml` or `.txt`) so the diff tool applies correct syntax highlighting.
 - **Port Validation & Busy Port Detection:** The port must be in the 1-65535 range, and the app checks whether the port is already in use before starting. A busy port now shows a clear message instead of crashing the application.
-- **Safer Proxy Start/Stop:** If the proxy fails to start, the partially initialized proxy is cleaned up, so you can simply change the port and start again. Stopping a proxy that never fully started no longer throws an error.
+- **Safer Proxy Start/Stop & Memory Protection:** If the proxy fails to start, the partially initialized proxy is cleaned up. Huge payloads (20 MB+) are safely handled without causing Out-of-Memory exceptions.
+- **Accurate Binary ContentLength:** Accurately reports payload sizes for binary and image responses.
 
 ### v2.0.0
 - **Auto-Responder (Mocking):** Create mock rules to intercept outgoing requests based on their URL, and instantly return a fake response directly from the proxy! This enables offline development, simulates edge-case server errors (e.g., 500 Internal Server Error), and allows manipulating payloads on the fly without touching the real server backend. Mocked requests are clearly marked as `[MOCKED]` in the session list.
