@@ -179,20 +179,70 @@ namespace SoapProxyApp
 
         private void BtnStart_Click(object sender, RoutedEventArgs e)
         {
-            if (!int.TryParse(TxtPort.Text, out int port))
+            if (!int.TryParse(TxtPort.Text, out int port) || port < 1 || port > 65535)
             {
-                MessageBox.Show("Please enter a valid port number.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Please enter a valid port number (1-65535).", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            if (!IsPortAvailable(port, out string portError))
+            {
+                MessageBox.Show($"Port {port} is already in use or cannot be opened.\n\n{portError}\n\nPlease choose a different port.", "Port Unavailable", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
             bool isSystemProxy = ChkSystemProxy.IsChecked == true;
-            proxyEngine.Start(port, isSystemProxy);
+            try
+            {
+                proxyEngine.Start(port, isSystemProxy);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Failed to start proxy on port {port}.\n\nError: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
             TxtPort.IsEnabled = false;
             ChkSystemProxy.IsEnabled = false;
             BtnStart.IsEnabled = false;
             BtnStop.IsEnabled = true;
             TxtStatus.Text = $"Proxy is running on 127.0.0.1:{port}" + (isSystemProxy ? " (System Proxy)" : "");
             TxtStatus.Foreground = System.Windows.Media.Brushes.Green;
+        }
+
+        // Checks both the OS listener table and an actual exclusive bind attempt.
+        private static bool IsPortAvailable(int port, out string error)
+        {
+            error = null;
+            try
+            {
+                var listeners = System.Net.NetworkInformation.IPGlobalProperties.GetIPGlobalProperties().GetActiveTcpListeners();
+                var existing = listeners.FirstOrDefault(l => l.Port == port);
+                if (existing != null)
+                {
+                    error = $"Another process is already listening on {existing}.";
+                    return false;
+                }
+            }
+            catch { /* If the listener table cannot be read, rely on the bind test below */ }
+
+            System.Net.Sockets.TcpListener probe = null;
+            try
+            {
+                probe = new System.Net.Sockets.TcpListener(System.Net.IPAddress.Any, port);
+                probe.ExclusiveAddressUse = true;
+                probe.Start();
+                return true;
+            }
+            catch (System.Net.Sockets.SocketException ex)
+            {
+                error = ex.Message;
+                return false;
+            }
+            finally
+            {
+                probe?.Stop();
+            }
         }
 
         private void BtnStop_Click(object sender, RoutedEventArgs e)
@@ -415,7 +465,7 @@ namespace SoapProxyApp
             });
         }
 
-        private string GetSafeSessionName(CapturedSession s, string suffix)
+        private string GetSafeSessionName(CapturedSession s, string suffix, string extension = ".xml")
         {
             string app = string.IsNullOrWhiteSpace(s.ProcessName) ? "UnknownApp" : s.ProcessName;
             string action = "NoAction";
@@ -430,7 +480,7 @@ namespace SoapProxyApp
             {
                 safeName = safeName.Replace(c, '_');
             }
-            return safeName + ".xml";
+            return safeName + extension;
         }
 
         private void BtnMock_Click(object sender, RoutedEventArgs e)
@@ -501,7 +551,9 @@ namespace SoapProxyApp
             }
             var s1 = (CapturedSession)LstSessions.SelectedItems[0];
             var s2 = (CapturedSession)LstSessions.SelectedItems[1];
-            CompareDiff(FormatXml(s1.RequestBody), FormatXml(s2.RequestBody), GetSafeSessionName(s1, "Req1"), GetSafeSessionName(s2, "Req2"));
+            var f1 = FormatForCompare(s1.RequestBody);
+            var f2 = FormatForCompare(s2.RequestBody);
+            CompareDiff(f1.Text, f2.Text, GetSafeSessionName(s1, "Req1", f1.Extension), GetSafeSessionName(s2, "Req2", f2.Extension));
         }
 
         private void MenuCompareRes_Click(object sender, RoutedEventArgs e)
@@ -513,7 +565,9 @@ namespace SoapProxyApp
             }
             var s1 = (CapturedSession)LstSessions.SelectedItems[0];
             var s2 = (CapturedSession)LstSessions.SelectedItems[1];
-            CompareDiff(FormatXml(s1.ResponseBody), FormatXml(s2.ResponseBody), GetSafeSessionName(s1, "Res1"), GetSafeSessionName(s2, "Res2"));
+            var f1 = FormatForCompare(s1.ResponseBody);
+            var f2 = FormatForCompare(s2.ResponseBody);
+            CompareDiff(f1.Text, f2.Text, GetSafeSessionName(s1, "Res1", f1.Extension), GetSafeSessionName(s2, "Res2", f2.Extension));
         }
 
         private void CompareDiff(string text1, string text2, string name1, string name2)
@@ -709,7 +763,7 @@ namespace SoapProxyApp
                 }
                 else if (ReqTabs.SelectedIndex == 5 && string.IsNullOrEmpty(TxtReqJson.Text))
                 {
-                    TxtReqJson.Text = ConvertXmlToJson(session.RequestBody);
+                    TxtReqJson.Text = FormatAsJson(session.RequestBody);
                     jsonFoldingStrategy.UpdateFoldings(reqJsonFoldingManager, TxtReqJson.Document);
                 }
             }
@@ -734,7 +788,7 @@ namespace SoapProxyApp
                 }
                 else if (ResTabs.SelectedIndex == 5 && string.IsNullOrEmpty(TxtResJson.Text))
                 {
-                    TxtResJson.Text = ConvertXmlToJson(session.ResponseBody);
+                    TxtResJson.Text = FormatAsJson(session.ResponseBody);
                     jsonFoldingStrategy.UpdateFoldings(resJsonFoldingManager, TxtResJson.Document);
                 }
             }
@@ -792,6 +846,44 @@ namespace SoapProxyApp
             {
                 return $"Unable to parse content as XML to JSON.\nError: {ex.Message}\n\nRAW:\n{xml}";
             }
+        }
+
+        private static bool IsLikelyJson(string body)
+        {
+            if (string.IsNullOrWhiteSpace(body)) return false;
+            string trimmed = body.TrimStart('\uFEFF', ' ', '\t', '\r', '\n');
+            return trimmed.StartsWith("{") || trimmed.StartsWith("[");
+        }
+
+        // Pretty-prints real JSON directly; falls back to XML -> JSON conversion for XML/SOAP bodies.
+        private string FormatAsJson(string body)
+        {
+            if (string.IsNullOrWhiteSpace(body)) return "Empty body.";
+            if (IsLikelyJson(body))
+            {
+                try
+                {
+                    return JToken.Parse(body).ToString(Newtonsoft.Json.Formatting.Indented);
+                }
+                catch (Exception ex)
+                {
+                    return $"Content looks like JSON but could not be parsed.\nError: {ex.Message}\n\nRAW:\n{body}";
+                }
+            }
+            return ConvertXmlToJson(body);
+        }
+
+        // Formats a body for the diff tool and returns the matching file extension.
+        private (string Text, string Extension) FormatForCompare(string body)
+        {
+            if (IsLikelyJson(body))
+            {
+                try { return (JToken.Parse(body).ToString(Newtonsoft.Json.Formatting.Indented), ".json"); }
+                catch { return (body, ".txt"); }
+            }
+            if (string.IsNullOrWhiteSpace(body)) return ("", ".txt");
+            try { return (XDocument.Parse(body).ToString(), ".xml"); }
+            catch { return (body, ".txt"); }
         }
 
         protected override void OnClosed(EventArgs e)

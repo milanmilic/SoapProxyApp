@@ -27,7 +27,15 @@ This application is **Portable** and does not require an installation wizard or 
 5. Click the **Install Cert** button. 
 6. Start making requests from your WCF or Web application (traffic will automatically route through the proxy and appear in the list).
 
+> **Note:** In Explicit mode (System Proxy unchecked), the app captures **any** HTTP/HTTPS traffic (SOAP, WCF, REST/JSON, ...) sent to the proxy port (default `8899`). However, a client must actually be configured to send its traffic to `localhost:<port>`. For example, in .NET (Core/5+) applications, an explicit WCF `ProxyAddress` applies only to WCF calls, while `HttpClient` instances without an explicit `Proxy` use the `HTTP_PROXY` / `HTTPS_PROXY` environment variables or the Windows System Proxy. If some calls are missing from the list, set those environment variables for the client process or enable **System Proxy**.
+
 ## What's New (Changelog)
+
+### v2.1.0
+- **Proper JSON Display:** The Formatted JSON tab now pretty-prints real JSON bodies (REST APIs) directly. Previously every body was parsed as XML, so JSON payloads always showed an "Unable to parse content as XML to JSON" error. XML/SOAP bodies are still converted from XML to JSON as before.
+- **JSON-aware Compare:** Comparing two requests/responses now formats JSON as JSON and XML as XML, and saves temporary files with the matching extension (`.json`, `.xml` or `.txt`) so the diff tool applies correct syntax highlighting.
+- **Port Validation & Busy Port Detection:** The port must be in the 1-65535 range, and the app checks whether the port is already in use before starting. A busy port now shows a clear message instead of crashing the application.
+- **Safer Proxy Start/Stop:** If the proxy fails to start, the partially initialized proxy is cleaned up, so you can simply change the port and start again. Stopping a proxy that never fully started no longer throws an error.
 
 ### v2.0.0
 - **Auto-Responder (Mocking):** Create mock rules to intercept outgoing requests based on their URL, and instantly return a fake response directly from the proxy! This enables offline development, simulates edge-case server errors (e.g., 500 Internal Server Error), and allows manipulating payloads on the fly without touching the real server backend. Mocked requests are clearly marked as `[MOCKED]` in the session list.

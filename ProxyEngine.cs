@@ -18,22 +18,34 @@ namespace SoapProxyApp
 
         public void Start(int port, bool setAsSystemProxy = false)
         {
-            proxyServer = new ProxyServer();
-            proxyServer.CertificateManager.CreateRootCertificate();
-            proxyServer.CertificateManager.TrustRootCertificate();
+            // Make sure a previous instance is not left running
+            Stop();
 
-            proxyServer.BeforeRequest += OnRequest;
-            proxyServer.BeforeResponse += OnResponse;
-
-            // Set proxy on specified port
-            explicitEndPoint = new ExplicitProxyEndPoint(IPAddress.Any, port, true);
-            proxyServer.AddEndPoint(explicitEndPoint);
-            proxyServer.Start();
-            
-            if (setAsSystemProxy)
+            try
             {
-                proxyServer.SetAsSystemHttpProxy(explicitEndPoint);
-                proxyServer.SetAsSystemHttpsProxy(explicitEndPoint);
+                proxyServer = new ProxyServer();
+                proxyServer.CertificateManager.CreateRootCertificate();
+                proxyServer.CertificateManager.TrustRootCertificate();
+
+                proxyServer.BeforeRequest += OnRequest;
+                proxyServer.BeforeResponse += OnResponse;
+
+                // Set proxy on specified port
+                explicitEndPoint = new ExplicitProxyEndPoint(IPAddress.Any, port, true);
+                proxyServer.AddEndPoint(explicitEndPoint);
+                proxyServer.Start();
+
+                if (setAsSystemProxy)
+                {
+                    proxyServer.SetAsSystemHttpProxy(explicitEndPoint);
+                    proxyServer.SetAsSystemHttpsProxy(explicitEndPoint);
+                }
+            }
+            catch
+            {
+                // Clean up the half-initialized server (and system proxy, if it was set) so Start can be retried
+                try { Stop(); } catch { proxyServer = null; }
+                throw;
             }
         }
 
@@ -48,9 +60,18 @@ namespace SoapProxyApp
             {
                 proxyServer.BeforeRequest -= OnRequest;
                 proxyServer.BeforeResponse -= OnResponse;
-                proxyServer.Stop();
-                proxyServer.Dispose();
-                proxyServer = null;
+                try
+                {
+                    if (proxyServer.ProxyRunning)
+                    {
+                        proxyServer.Stop();
+                    }
+                }
+                finally
+                {
+                    proxyServer.Dispose();
+                    proxyServer = null;
+                }
             }
         }
 
