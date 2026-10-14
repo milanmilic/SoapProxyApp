@@ -1,0 +1,23 @@
+<Window x:Class="SoapProxyApp.UpdateAvailableWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Update Available" SizeToContent="WidthAndHeight" ResizeMode="NoResize" ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner" Background="{DynamicResource WindowBg}">
+    <Window.Resources>
+        <Style TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource TextFg}"/>
+        </Style>
+    </Window.Resources>
+
+    <StackPanel Margin="20" MinWidth="420">
+        <TextBlock Text="🎉 A new version of SOAP Proxy App is available!" FontWeight="Bold" FontSize="15" Margin="0,0,0,10"/>
+        <TextBlock Name="TxtVersions" Margin="0,0,0,6"/>
+        <TextBlock Text="Would you like to open the release page and download it now?" TextWrapping="Wrap" Opacity="0.85" Margin="0,0,0,16"/>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Style="{DynamicResource AppButtonStyle}" Name="BtnDownload" Content="⬇ Download" Width="110" Height="30" Margin="0,0,10,0" FontWeight="Bold" Background="#4CAF50" Foreground="White" BorderThickness="0" IsDefault="True" Click="BtnDownload_Click"/>
+            <Button Style="{DynamicResource AppButtonStyle}" Content="Remind me later" Width="120" Height="30" Margin="0,0,10,0" IsCancel="True"/>
+            <Button Style="{DynamicResource AppButtonStyle}" Name="BtnSkip" Content="Don't show again" Width="130" Height="30" Click="BtnSkip_Click"
+                    ToolTip="Don't notify me about this version again. You'll be notified when a newer version is released."/>
+        </StackPanel>
+    </StackPanel>
+</Window>

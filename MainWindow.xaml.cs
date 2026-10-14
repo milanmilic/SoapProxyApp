@@ -24,6 +24,7 @@ namespace SoapProxyApp
     public partial class MainWindow : Window
     {
         private ProxyEngine proxyEngine;
+        private int runningPort;
         public ObservableCollection<CapturedSession> Sessions { get; set; }
         private bool isDarkMode = false;
         private IHighlightingDefinition lightXml;
@@ -72,6 +73,33 @@ namespace SoapProxyApp
 
             _ = CheckForUpdatesAsync();
             CheckStaleSystemProxy();
+            CheckStaleIisAppPools();
+        }
+
+        private void CheckStaleIisAppPools()
+        {
+            var attached = IisAppPoolProxyManager.GetAttachedPools();
+            if (attached.Count == 0) return;
+
+            var result = MessageBox.Show(
+                "These IIS App Pools are still routed through the proxy:\n\n" +
+                string.Join("\n", attached.Select(p => $"• {p.Name} (port {p.Port})")) +
+                "\n\nThis usually means SoapProxyApp was closed unexpectedly. While the proxy is not running, their outgoing HTTP calls will fail.\n\n" +
+                "Would you like to detach them now (restores previous settings and recycles the App Pools)?",
+                "IIS App Pools Still Attached",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                Cursor = Cursors.Wait;
+                List<string> errors;
+                try { errors = IisAppPoolProxyManager.DetachAll(); }
+                finally { Cursor = null; }
+
+                if (errors.Count > 0)
+                    MessageBox.Show("Some App Pools could not be detached:\n\n" + string.Join("\n", errors) + "\n\nYou can retry via 🎯 Capture App → IIS App Pools.", "Detach Failed", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void CheckStaleSystemProxy()
@@ -106,30 +134,31 @@ namespace SoapProxyApp
                     string latestVersion = json["tag_name"]?.ToString();
                     string downloadUrl = json["html_url"]?.ToString();
 
-                    if (!string.IsNullOrEmpty(latestVersion))
-                    {
-                        string cleanLatest = latestVersion.TrimStart('v', 'V');
-                        string cleanCurrent = AppVersion.TrimStart('v', 'V');
+                    Version vLatest = AppSettings.ParseVersionTag(latestVersion);
+                    Version vCurrent = AppSettings.ParseVersionTag(AppVersion);
+                    if (vLatest == null || vCurrent == null || vLatest <= vCurrent) return;
 
-                        if (Version.TryParse(cleanLatest, out Version vLatest) && Version.TryParse(cleanCurrent, out Version vCurrent))
+                    var settings = AppSettings.Load();
+                    Version vSkipped = AppSettings.ParseVersionTag(settings.SkippedUpdateVersion);
+                    if (vSkipped != null && vLatest <= vSkipped) return;
+
+                    Dispatcher.Invoke(() =>
+                    {
+                        var dlg = new UpdateAvailableWindow(AppVersion, "v" + vLatest.ToString(3));
+                        if (IsVisible) dlg.Owner = this;
+                        else dlg.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+                        dlg.ShowDialog();
+
+                        if (dlg.Choice == UpdateChoice.Download && !string.IsNullOrEmpty(downloadUrl))
                         {
-                            if (vLatest > vCurrent)
-                            {
-                                Dispatcher.Invoke(() =>
-                                {
-                                    var result = MessageBox.Show($"A new version of SOAP Proxy App ({latestVersion}) is available!\n\nWould you like to download it now?", "Update Available", MessageBoxButton.YesNo, MessageBoxImage.Information);
-                                    if (result == MessageBoxResult.Yes && !string.IsNullOrEmpty(downloadUrl))
-                                    {
-                                        Process.Start(new ProcessStartInfo
-                                        {
-                                            FileName = downloadUrl,
-                                            UseShellExecute = true
-                                        });
-                                    }
-                                });
-                            }
+                            Process.Start(new ProcessStartInfo { FileName = downloadUrl, UseShellExecute = true });
                         }
-                    }
+                        else if (dlg.Choice == UpdateChoice.Skip)
+                        {
+                            settings.SkippedUpdateVersion = vLatest.ToString(3);
+                            settings.Save();
+                        }
+                    });
                 }
             }
             catch { /* Ignore update check failures silently */ }
@@ -223,10 +252,12 @@ namespace SoapProxyApp
                 return;
             }
 
+            runningPort = port;
             TxtPort.IsEnabled = false;
             ChkSystemProxy.IsEnabled = false;
             BtnStart.IsEnabled = false;
             BtnStop.IsEnabled = true;
+            BtnCapture.IsEnabled = true;
             TxtStatus.Text = $"Proxy is running on 127.0.0.1:{port}" + (isSystemProxy ? " (System Proxy)" : "");
             TxtStatus.Foreground = System.Windows.Media.Brushes.Green;
         }
@@ -266,15 +297,56 @@ namespace SoapProxyApp
             }
         }
 
-        private void BtnStop_Click(object sender, RoutedEventArgs e)
+        private async void BtnStop_Click(object sender, RoutedEventArgs e)
         {
             proxyEngine.Stop();
+            runningPort = 0;
+            BtnStop.IsEnabled = false;
+            BtnCapture.IsEnabled = false;
+
+            if (IisAppPoolProxyManager.HasAttachedPools)
+            {
+                TxtStatus.Text = "Detaching IIS App Pools...";
+                TxtStatus.Foreground = System.Windows.Media.Brushes.DarkOrange;
+                var errors = await System.Threading.Tasks.Task.Run(IisAppPoolProxyManager.DetachAll);
+                if (errors.Count > 0)
+                    MessageBox.Show("Some App Pools could not be detached:\n\n" + string.Join("\n", errors), "Detach Failed", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
             TxtPort.IsEnabled = true;
             ChkSystemProxy.IsEnabled = true;
             BtnStart.IsEnabled = true;
-            BtnStop.IsEnabled = false;
             TxtStatus.Text = "Proxy is stopped.";
             TxtStatus.Foreground = System.Windows.Media.Brushes.Red;
+
+            var running = ProxyLaunchTracker.GetRunning();
+            if (running.Count > 0)
+            {
+                MessageBox.Show(
+                    "These programs were launched with the proxy and are still running:\n\n" +
+                    string.Join("\n", running.Select(r => "• " + r)) +
+                    "\n\nTheir outgoing HTTP/HTTPS calls will fail until you start the proxy again on the same port, or restart them normally.",
+                    "Programs Still Using the Proxy", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+
+        private void BtnCapture_Click(object sender, RoutedEventArgs e)
+        {
+            BtnCapture.ContextMenu.PlacementTarget = BtnCapture;
+            BtnCapture.ContextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+            BtnCapture.ContextMenu.IsOpen = true;
+        }
+
+        private void MenuLaunchWithProxy_Click(object sender, RoutedEventArgs e)
+        {
+            if (runningPort == 0) return;
+            new LaunchWithProxyWindow(runningPort) { Owner = this }.ShowDialog();
+        }
+
+        private void MenuIisAppPools_Click(object sender, RoutedEventArgs e)
+        {
+            if (runningPort == 0) return;
+            new IisAppPoolsWindow(runningPort) { Owner = this }.ShowDialog();
         }
 
         private void BtnClear_Click(object sender, RoutedEventArgs e)
@@ -910,6 +982,7 @@ namespace SoapProxyApp
         protected override void OnClosed(EventArgs e)
         {
             proxyEngine.Stop();
+            try { IisAppPoolProxyManager.DetachAll(); } catch { }
             base.OnClosed(e);
         }
     }

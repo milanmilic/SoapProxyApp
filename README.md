@@ -5,6 +5,7 @@
 ## Key Features
 - **API Auto-Responder & Mocking:** Intercept outgoing API requests and return fake payloads to test edge-cases, simulate offline development, or inject 500 Server Errors without touching the real backend.
 - Intercept HTTP/HTTPS request and response packets (Explicit or Global System Proxy)
+- **Capture a single app without System Proxy:** launch Visual Studio / any program, or attach IIS App Pools, so their SOAP and REST calls go through the proxy without code changes
 - **Replay / Resend Requests** to the server with modified headers and body, on the fly!
 - View raw Headers, Raw Body, Formatted XML, Formatted JSON, HTML, and Images
 - Automatic conversion from SOAP XML to formatted JSON for easier reading
@@ -27,9 +28,30 @@ This application is **Portable** and does not require an installation wizard or 
 5. Click the **Install Cert** button. 
 6. Start making requests from your WCF or Web application (traffic will automatically route through the proxy and appear in the list).
 
-> **Note:** In Explicit mode (System Proxy unchecked), the app captures **any** HTTP/HTTPS traffic (SOAP, WCF, REST/JSON, ...) sent to the proxy port (default `8899`). However, a client must actually be configured to send its traffic to `localhost:<port>`. For example, in .NET (Core/5+) applications, an explicit WCF `ProxyAddress` applies only to WCF calls, while `HttpClient` instances without an explicit `Proxy` use the `HTTP_PROXY` / `HTTPS_PROXY` environment variables or the Windows System Proxy. If some calls are missing from the list, set those environment variables for the client process or enable **System Proxy**.
+> **Note:** In Explicit mode (System Proxy unchecked), the app captures **any** HTTP/HTTPS traffic (SOAP, WCF, REST/JSON, ...) sent to the proxy port (default `8899`). However, a client must actually be configured to send its traffic to `localhost:<port>`. For example, in .NET (Core/5+) applications, an explicit WCF `ProxyAddress` applies only to WCF calls, while `HttpClient` instances without an explicit `Proxy` use the `HTTP_PROXY` / `HTTPS_PROXY` environment variables or the Windows System Proxy. If REST calls are missing from the list, use **🎯 Capture App** (see below) instead of enabling **System Proxy**.
+
+## Capturing Apps Without System Proxy
+Use **🎯 Capture App** (enabled while the proxy is running) to capture SOAP **and** REST traffic from one application only, without changing its code and without the Windows System Proxy. The target process receives `HTTP_PROXY` / `HTTPS_PROXY = http://127.0.0.1:<port>` and `NO_PROXY = localhost,127.0.0.1,::1`.
+
+- **Launch Program with Proxy:** Starts Visual Studio (detected automatically via `vswhere`), VS Code, Command Prompt, PowerShell or any `.exe` with these variables. Everything it starts (F5 in Visual Studio, `dotnet run`, ...) inherits them. The last 10 launches are remembered for one-click relaunch. Close running Visual Studio / VS Code instances first, because an instance that is already open does not get the variables.
+- **IIS App Pools:** Attach adds the variables to the selected App Pool's `environmentVariables` (via `appcmd.exe`) and recycles it. Detach restores the previous values. All attached pools are detached automatically when you click **Stop Proxy** or close the app. If the app was terminated unexpectedly, it offers to detach them on the next start.
+
+**Limitations:**
+- Works for .NET Core / .NET 5+ (`HttpClient`, WCF client), Python, curl and Go. .NET Framework 4.x apps ignore these variables; configure them via `web.config` / `app.config` (`<defaultProxy>` or the WCF binding's `proxyAddress`).
+- .NET never sends calls to `localhost` / `127.0.0.1` through a proxy.
+- SoapProxyApp runs as Administrator, so programs it launches also run as Administrator.
+- Keep the proxy running while launched programs are open; otherwise their HTTP calls fail.
+- HTTPS clients must trust the proxy root certificate. Click **Install Cert** (Local Machine), especially for IIS App Pool identities.
+- IIS App Pool environment variables require IIS 10 or newer.
 
 ## What's New (Changelog)
+
+### v2.2.0
+- **🎯 Capture App - Launch Program with Proxy:** Capture REST (`HttpClient`) and SOAP calls from a single application without changing its code or enabling System Proxy. Launch Visual Studio, VS Code, a console or any `.exe` with `HTTP_PROXY` / `HTTPS_PROXY` / `NO_PROXY` pointing to the proxy; child processes (e.g. F5) inherit them. Recent launches are remembered.
+- **🎯 Capture App - IIS App Pools:** Attach/Detach the proxy to IIS App Pools via their environment variables (IIS 10+), with automatic recycle, automatic detach on Stop Proxy / app close, and restoration of any previous values.
+- **Crash-safe cleanup:** Attached App Pools are recorded in `%LOCALAPPDATA%\SoapProxyApp\iis_proxy_state.json`. If the app is terminated unexpectedly, it offers to detach them on the next start, like the stale System Proxy check.
+- **Stop warning:** Stopping the proxy warns about programs that were launched with the proxy and are still running.
+- **Update notification:** The startup update check now offers **Download**, **Remind me later** and **Don't show again** (skips only that version; you are notified again when a newer one is released). Release tags in both `v2.2.0` and `v.2.2.0` formats are recognized.
 
 ### v2.1.0
 - **Proper JSON Display:** The Formatted JSON tab now pretty-prints real JSON bodies (REST APIs) directly. Previously every body was parsed as XML, so JSON payloads always showed an "Unable to parse content as XML to JSON" error. XML/SOAP bodies are still converted from XML to JSON as before.

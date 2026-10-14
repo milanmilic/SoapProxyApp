@@ -46,6 +46,15 @@
                     <Button Style="{DynamicResource AppButtonStyle}" Name="BtnSave" Content="💾 Save" Width="80" Height="30" Margin="10,0,0,0" Click="BtnSave_Click"/>
                     <Button Style="{DynamicResource AppButtonStyle}" Name="BtnLoad" Content="📂 Load" Width="80" Height="30" Margin="5,0,0,0" Click="BtnLoad_Click"/>
                     <Button Style="{DynamicResource AppButtonStyle}" Name="BtnMock" Content="🎭 Mock Rules" Width="100" Height="30" Margin="15,0,0,0" Click="BtnMock_Click" Background="#2196F3" Foreground="White" BorderThickness="0" FontWeight="Bold"/>
+                    <Button Style="{DynamicResource AppButtonStyle}" Name="BtnCapture" Content="🎯 Capture App ▾" Width="120" Height="30" Margin="10,0,0,0" Click="BtnCapture_Click" IsEnabled="False" Background="#673AB7" Foreground="White" BorderThickness="0" FontWeight="Bold"
+                            ToolTipService.ShowOnDisabled="True" ToolTip="Route one program or IIS App Pool through the proxy without System Proxy (start the proxy first)">
+                        <Button.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="🚀 Launch Program with Proxy (Visual Studio, VS Code, console, .exe)..." Click="MenuLaunchWithProxy_Click" FontWeight="Bold"/>
+                                <MenuItem Header="🌐 IIS App Pools..." Click="MenuIisAppPools_Click"/>
+                            </ContextMenu>
+                        </Button.ContextMenu>
+                    </Button>
                     <Button Style="{DynamicResource AppButtonStyle}" Name="BtnExportCert" Content="Install Cert" ToolTip="Installs to Local Machine (Requires Admin)" Width="100" Height="30" Margin="10,0,0,0" Click="BtnExportCert_Click"/>
                     
                     <Button Style="{DynamicResource AppButtonStyle}" Name="BtnTheme" Content="🌙 Dark Mode" Width="110" Height="30" Margin="15,0,0,0" Click="BtnTheme_Click"/>
