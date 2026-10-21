@@ -38,15 +38,16 @@
             <Grid Margin="10,0">
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <TextBlock Text="Port:" VerticalAlignment="Center" Margin="0,0,5,0" FontWeight="Bold" Foreground="{DynamicResource TextFg}"/>
-                    <TextBox Name="TxtPort" Text="8899" Width="60" Padding="2" Background="{DynamicResource PanelBg}" Foreground="{DynamicResource TextFg}" IsReadOnly="False" BorderThickness="1" BorderBrush="{DynamicResource BorderColor}" Margin="0,0,15,0" VerticalAlignment="Center"/>
-                    <CheckBox Name="ChkSystemProxy" Content="System Proxy" VerticalAlignment="Center" Margin="0,0,15,0" Foreground="{DynamicResource TextFg}" ToolTip="Capture ALL system HTTP/HTTPS traffic (like Fiddler)" />
-                    <Button Style="{DynamicResource AppButtonStyle}" Name="BtnStart" Content="Start Proxy" Width="100" Height="30" Margin="0,0,10,0" Click="BtnStart_Click" FontWeight="Bold"/>
-                    <Button Style="{DynamicResource AppButtonStyle}" Name="BtnStop" Content="Stop Proxy" Width="100" Height="30" IsEnabled="False" Click="BtnStop_Click"/>
+                    <TextBox Name="TxtPort" Text="8899" Width="56" Padding="2" Background="{DynamicResource PanelBg}" Foreground="{DynamicResource TextFg}" IsReadOnly="False" BorderThickness="1" BorderBrush="{DynamicResource BorderColor}" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                    <CheckBox Name="ChkSystemProxy" Content="System Proxy" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="{DynamicResource TextFg}" ToolTip="Capture ALL system HTTP/HTTPS traffic (like Fiddler)" />
+                    <CheckBox Name="ChkAutoStart" Content="Auto-Start" VerticalAlignment="Center" Margin="0,0,12,0" Foreground="{DynamicResource TextFg}" ToolTip="Automatically start the proxy when SoapProxyApp opens" Checked="ChkAutoStart_Changed" Unchecked="ChkAutoStart_Changed" />
+                    <Button Style="{DynamicResource AppButtonStyle}" Name="BtnStart" Content="Start Proxy" Width="95" Height="30" Margin="0,0,8,0" Click="BtnStart_Click" FontWeight="Bold"/>
+                    <Button Style="{DynamicResource AppButtonStyle}" Name="BtnStop" Content="Stop Proxy" Width="95" Height="30" IsEnabled="False" Click="BtnStop_Click"/>
                     <Button Style="{DynamicResource AppButtonStyle}" Name="BtnClear" Content="🗑 Clear All" Width="90" Height="30" Margin="10,0,0,0" Click="BtnClear_Click" Background="#FF9800" Foreground="White" BorderThickness="0" FontWeight="Bold"/>
                     <Button Style="{DynamicResource AppButtonStyle}" Name="BtnSave" Content="💾 Save" Width="80" Height="30" Margin="10,0,0,0" Click="BtnSave_Click"/>
                     <Button Style="{DynamicResource AppButtonStyle}" Name="BtnLoad" Content="📂 Load" Width="80" Height="30" Margin="5,0,0,0" Click="BtnLoad_Click"/>
-                    <Button Style="{DynamicResource AppButtonStyle}" Name="BtnMock" Content="🎭 Mock Rules" Width="100" Height="30" Margin="15,0,0,0" Click="BtnMock_Click" Background="#2196F3" Foreground="White" BorderThickness="0" FontWeight="Bold"/>
-                    <Button Style="{DynamicResource AppButtonStyle}" Name="BtnCapture" Content="🎯 Capture App ▾" Width="120" Height="30" Margin="10,0,0,0" Click="BtnCapture_Click" IsEnabled="False" Background="#673AB7" Foreground="White" BorderThickness="0" FontWeight="Bold"
+                    <Button Style="{DynamicResource AppButtonStyle}" Name="BtnMock" Content="🎭 Mock Rules" Width="112" Height="30" Margin="10,0,0,0" Click="BtnMock_Click" Background="#2196F3" Foreground="White" BorderThickness="0" FontWeight="Bold"/>
+                    <Button Style="{DynamicResource AppButtonStyle}" Name="BtnCapture" Content="🎯 Capture App ▾" Width="125" Height="30" Margin="8,0,0,0" Click="BtnCapture_Click" IsEnabled="False" Background="#673AB7" Foreground="White" BorderThickness="0" FontWeight="Bold"
                             ToolTipService.ShowOnDisabled="True" ToolTip="Route one program or IIS App Pool through the proxy without System Proxy (start the proxy first)">
                         <Button.ContextMenu>
                             <ContextMenu>
@@ -55,10 +56,10 @@
                             </ContextMenu>
                         </Button.ContextMenu>
                     </Button>
-                    <Button Style="{DynamicResource AppButtonStyle}" Name="BtnExportCert" Content="Install Cert" ToolTip="Installs to Local Machine (Requires Admin)" Width="100" Height="30" Margin="10,0,0,0" Click="BtnExportCert_Click"/>
+                    <Button Style="{DynamicResource AppButtonStyle}" Name="BtnExportCert" Content="Install Cert" ToolTip="Installs to Local Machine (Requires Admin)" Width="95" Height="30" Margin="8,0,0,0" Click="BtnExportCert_Click"/>
                     
-                    <Button Style="{DynamicResource AppButtonStyle}" Name="BtnTheme" Content="🌙 Dark Mode" Width="110" Height="30" Margin="15,0,0,0" Click="BtnTheme_Click"/>
-                    <TextBlock Name="TxtStatus" Text="Proxy is stopped." VerticalAlignment="Center" Margin="20,0,0,0" FontWeight="Bold" Foreground="#D32F2F"/>
+                    <Button Style="{DynamicResource AppButtonStyle}" Name="BtnTheme" Content="🌙 Dark Mode" Width="105" Height="30" Margin="8,0,0,0" Click="BtnTheme_Click"/>
+                    <TextBlock Name="TxtStatus" Text="Proxy is stopped." VerticalAlignment="Center" Margin="14,0,0,0" FontWeight="Bold" Foreground="#D32F2F"/>
                 </StackPanel>
                 
                 <TextBlock Name="TxtVersion" Text="v1.5.0" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="{DynamicResource TextFg}" Opacity="0.5" FontWeight="SemiBold" FontSize="11" />
@@ -67,96 +68,210 @@
 
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="400"/>
+                <ColumnDefinition Width="1.15*" MinWidth="460"/>
                 <ColumnDefinition Width="5"/>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="1*" MinWidth="360"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Left Column: Sessions List -->
+            <!-- Left Column: Sessions Grid -->
             <Grid Grid.Column="0" Margin="10">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 
-                <Border Grid.Row="0" BorderBrush="{DynamicResource BorderColor}" BorderThickness="1" Margin="0,0,0,5" Background="{DynamicResource PanelBg}" CornerRadius="2">
-                    <Grid>
-                        <TextBlock Text="🔍 Filter (URL, App, Method...)" Margin="5,0" VerticalAlignment="Center" Foreground="{DynamicResource TextFg}" Opacity="0.5" IsHitTestVisible="False">
-                            <TextBlock.Style>
+                <Grid Grid.Row="0" Margin="0,0,0,5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Grid.Column="0" BorderBrush="{DynamicResource BorderColor}" BorderThickness="1" Background="{DynamicResource PanelBg}" CornerRadius="2">
+                        <Grid>
+                            <TextBlock Text="🔍 Filter (URL, App, Method, Headers...)" Margin="5,0" VerticalAlignment="Center" Foreground="{DynamicResource TextFg}" Opacity="0.5" IsHitTestVisible="False">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Hidden"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Text.Length, ElementName=TxtFilter}" Value="0">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                            <TextBox Name="TxtFilter" Background="Transparent" Foreground="{DynamicResource TextFg}" BorderThickness="0" Padding="5" IsReadOnly="False" TextChanged="TxtFilter_TextChanged"/>
+                        </Grid>
+                    </Border>
+                    <Button Grid.Column="1" Style="{DynamicResource AppButtonStyle}" Name="BtnColumns" Content="➕ Columns ▾" Width="100" Height="28" Margin="5,0,0,0" Click="BtnColumns_Click"
+                            ToolTip="Add or remove custom Request/Response header columns in the grid">
+                        <Button.ContextMenu>
+                            <ContextMenu Name="MenuColumns"/>
+                        </Button.ContextMenu>
+                    </Button>
+                </Grid>
+
+                <DataGrid Name="LstSessions" Grid.Row="1" Margin="0"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          CanUserAddRows="False"
+                          CanUserDeleteRows="False"
+                          CanUserSortColumns="True"
+                          CanUserReorderColumns="True"
+                          CanUserResizeColumns="True"
+                          CanUserResizeRows="False"
+                          HeadersVisibility="Column"
+                          SelectionMode="Extended"
+                          SelectionUnit="FullRow"
+                          RowHeight="28"
+                          FontSize="12"
+                          GridLinesVisibility="All"
+                          HorizontalGridLinesBrush="{DynamicResource GridLineColor}"
+                          VerticalGridLinesBrush="{DynamicResource GridLineColor}"
+                          BorderBrush="{DynamicResource BorderColor}"
+                          BorderThickness="1"
+                          Background="{DynamicResource PanelBg}"
+                          Foreground="{DynamicResource TextFg}"
+                          ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                          ScrollViewer.VerticalScrollBarVisibility="Auto"
+                          SelectionChanged="LstSessions_SelectionChanged"
+                          KeyDown="LstSessions_KeyDown">
+                    <DataGrid.ColumnHeaderStyle>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="Background" Value="{DynamicResource HeaderBg}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource TextFg}"/>
+                            <Setter Property="BorderBrush" Value="{DynamicResource BorderColor}"/>
+                            <Setter Property="BorderThickness" Value="0,0,1,1"/>
+                            <Setter Property="Padding" Value="8,6"/>
+                            <Setter Property="FontWeight" Value="SemiBold"/>
+                            <Setter Property="FontSize" Value="12"/>
+                            <Setter Property="Cursor" Value="Hand"/>
+                        </Style>
+                    </DataGrid.ColumnHeaderStyle>
+                    <DataGrid.CellStyle>
+                        <Style TargetType="DataGridCell">
+                            <Setter Property="BorderThickness" Value="0"/>
+                            <Setter Property="Padding" Value="8,0"/>
+                            <Setter Property="Background" Value="Transparent"/>
+                            <Setter Property="Foreground" Value="{DynamicResource TextFg}"/>
+                            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="DataGridCell">
+                                        <Border Padding="{TemplateBinding Padding}" Background="Transparent" SnapsToDevicePixels="True">
+                                            <ContentPresenter VerticalAlignment="Center" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter Property="Background" Value="Transparent"/>
+                                    <Setter Property="Foreground" Value="{DynamicResource TextFg}"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGrid.CellStyle>
+                    <DataGrid.RowStyle>
+                        <Style TargetType="DataGridRow">
+                            <Setter Property="Background" Value="{DynamicResource ItemBg}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource TextFg}"/>
+                            <Setter Property="BorderThickness" Value="0"/>
+                            <Setter Property="ToolTip" Value="{Binding Url}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding StatusCategory}" Value="Success">
+                                    <Setter Property="Background" Value="{DynamicResource SuccessBg}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding StatusCategory}" Value="Error">
+                                    <Setter Property="Background" Value="{DynamicResource ErrorBg}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding StatusCategory}" Value="Warning">
+                                    <Setter Property="Background" Value="{DynamicResource WarningBg}" />
+                                </DataTrigger>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter Property="Background" Value="{DynamicResource ItemSelectedBg}" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGrid.RowStyle>
+                    <DataGrid.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Replay / Resend Request" Click="MenuReplay_Click" FontWeight="Bold" />
+                            <MenuItem Header="🎭 Mock this Endpoint..." Click="MenuMock_Click" FontWeight="Bold" Foreground="#2196F3" />
+                            <MenuItem Header="Delete Selected" Click="MenuDelete_Click" Foreground="Red" />
+                            <Separator />
+                            <MenuItem Header="💾 Save Selected Session(s)..." Click="MenuSaveSelected_Click" />
+                            <MenuItem Header="📂 Load Session(s)..." Click="MenuLoad_Click" />
+                            <Separator />
+                            <MenuItem Header="Compare Requests (VS Code / WinMerge)" Click="MenuCompareReq_Click" />
+                            <MenuItem Header="Compare Responses (VS Code / WinMerge)" Click="MenuCompareRes_Click" />
+                        </ContextMenu>
+                    </DataGrid.ContextMenu>
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Time" Binding="{Binding Timestamp, StringFormat='HH:mm:ss'}" SortMemberPath="Timestamp" Width="68">
+                            <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="TextBlock">
-                                    <Setter Property="Visibility" Value="Hidden"/>
+                                    <Setter Property="HorizontalAlignment" Value="Center"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="Status" Binding="{Binding StatusCode}" SortMemberPath="StatusCode" Width="56">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="FontWeight" Value="Bold"/>
+                                    <Setter Property="HorizontalAlignment" Value="Center"/>
                                     <Style.Triggers>
-                                        <DataTrigger Binding="{Binding Text.Length, ElementName=TxtFilter}" Value="0">
-                                            <Setter Property="Visibility" Value="Visible"/>
+                                        <DataTrigger Binding="{Binding StatusCategory}" Value="Success">
+                                            <Setter Property="Foreground" Value="{DynamicResource SuccessFg}"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding StatusCategory}" Value="Error">
+                                            <Setter Property="Foreground" Value="{DynamicResource ErrorFg}"/>
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
-                            </TextBlock.Style>
-                        </TextBlock>
-                        <TextBox Name="TxtFilter" Background="Transparent" Foreground="{DynamicResource TextFg}" BorderThickness="0" Padding="5" IsReadOnly="False" TextChanged="TxtFilter_TextChanged"/>
-                    </Grid>
-                </Border>
-
-                <ListBox Name="LstSessions" Grid.Row="1" Margin="0" SelectionMode="Extended" SelectionChanged="LstSessions_SelectionChanged" KeyDown="LstSessions_KeyDown" BorderBrush="{DynamicResource BorderColor}" BorderThickness="1" Background="{DynamicResource PanelBg}">
-                <ListBox.ContextMenu>
-                    <ContextMenu>
-                        <MenuItem Header="Replay / Resend Request" Click="MenuReplay_Click" FontWeight="Bold" />
-                        <MenuItem Header="🎭 Mock this Endpoint..." Click="MenuMock_Click" FontWeight="Bold" Foreground="#2196F3" />
-                        <MenuItem Header="Delete Selected" Click="MenuDelete_Click" Foreground="Red" />
-                        <Separator />
-                        <MenuItem Header="💾 Save Selected Session(s)..." Click="MenuSaveSelected_Click" />
-                        <MenuItem Header="📂 Load Session(s)..." Click="MenuLoad_Click" />
-                        <Separator />
-                        <MenuItem Header="Compare Requests (VS Code / WinMerge)" Click="MenuCompareReq_Click" />
-                        <MenuItem Header="Compare Responses (VS Code / WinMerge)" Click="MenuCompareRes_Click" />
-                    </ContextMenu>
-                </ListBox.ContextMenu>
-                <ListBox.ItemContainerStyle>
-                    <Style TargetType="ListBoxItem">
-                        <Style.Triggers>
-                            <Trigger Property="IsSelected" Value="True">
-                                <Setter Property="Background" Value="{DynamicResource ItemSelectedBg}"/>
-                                <Setter Property="BorderThickness" Value="0"/>
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </ListBox.ItemContainerStyle>
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <Border x:Name="ItemBorder" Margin="0,1" Padding="3,2" CornerRadius="3" Background="Transparent" BorderThickness="2" BorderBrush="Transparent">
-                            <StackPanel>
-                                <TextBlock Text="{Binding Url}" FontWeight="SemiBold" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource ItemText}"/>
-                                <TextBlock Foreground="{DynamicResource TextFg}" Opacity="0.7" FontSize="11" Margin="0,1,0,0">
-                                    <Run Text="{Binding Timestamp, StringFormat='HH:mm:ss'}" />
-                                    <Run Text=" | Status: " />
-                                    <Run Text="{Binding StatusCode}" FontWeight="Bold" />
-                                    <Run Text=" | Method: " />
-                                    <Run Text="{Binding Method}" />
-                                    <Run Text=" | App: " />
-                                    <Run Text="{Binding ProcessName}" />
-                                    <Run Text=" | Length: " />
-                                    <Run Text="{Binding FormattedLength, Mode=OneWay}" />
-                                </TextBlock>
-                            </StackPanel>
-                        </Border>
-                        <DataTemplate.Triggers>
-                            <DataTrigger Binding="{Binding StatusCategory}" Value="Success">
-                                <Setter TargetName="ItemBorder" Property="Background" Value="{DynamicResource SuccessBg}" />
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding StatusCategory}" Value="Error">
-                                <Setter TargetName="ItemBorder" Property="Background" Value="{DynamicResource ErrorBg}" />
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding StatusCategory}" Value="Warning">
-                                <Setter TargetName="ItemBorder" Property="Background" Value="{DynamicResource WarningBg}" />
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
-                                <Setter TargetName="ItemBorder" Property="BorderBrush" Value="{DynamicResource AccentColor}" />
-                                <Setter TargetName="ItemBorder" Property="Background" Value="{DynamicResource ItemSelectedBg}" />
-                            </DataTrigger>
-                        </DataTemplate.Triggers>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="Method" Binding="{Binding Method}" SortMemberPath="Method" Width="62">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="FontWeight" Value="SemiBold"/>
+                                    <Setter Property="HorizontalAlignment" Value="Center"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="Duration" Binding="{Binding FormattedDuration, Mode=OneWay}" SortMemberPath="DurationMs" Width="76">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="HorizontalAlignment" Value="Right"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="Size" Binding="{Binding FormattedLength, Mode=OneWay}" SortMemberPath="ContentLength" Width="70">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="HorizontalAlignment" Value="Right"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="App" Binding="{Binding ProcessName}" SortMemberPath="ProcessName" Width="125">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+                                    <Setter Property="ToolTip" Value="{Binding ProcessName}"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="URL" Binding="{Binding Url}" SortMemberPath="Url" Width="*" MinWidth="240">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Foreground" Value="{DynamicResource ItemText}"/>
+                                    <Setter Property="FontWeight" Value="SemiBold"/>
+                                    <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+                                    <Setter Property="ToolTip" Value="{Binding Url}"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
             </Grid>
 
             <!-- Vertical Splitter -->

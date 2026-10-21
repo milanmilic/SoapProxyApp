@@ -84,8 +84,17 @@ namespace SoapProxyApp
             }
         }
 
+        private sealed class SessionTrack
+        {
+            public System.Diagnostics.Stopwatch Stopwatch { get; } = System.Diagnostics.Stopwatch.StartNew();
+            public string Status { get; set; }
+        }
+
         private async Task OnRequest(object sender, SessionEventArgs e)
         {
+            var track = new SessionTrack();
+            e.UserData = track;
+
             // Check for Mock Rules first
             if (MockRulesManager.Rules != null)
             {
@@ -105,8 +114,8 @@ namespace SoapProxyApp
                         fakeHeaders);
                         
                     // Short-circuit: we don't proceed to read request or contact the server
-                    
-                    e.UserData = "MOCKED"; // Flag for OnResponse to ignore if it fires
+                    track.Stopwatch.Stop();
+                    track.Status = "MOCKED"; // Flag for OnResponse to ignore if it fires
 
                     // Build the session manually to show it in the UI
                     string processName = "Unknown";
@@ -138,7 +147,8 @@ namespace SoapProxyApp
                         ResponseBody = mockRule.ResponseBody ?? "",
                         ResponseBodyBytes = System.Text.Encoding.UTF8.GetBytes(mockRule.ResponseBody ?? ""),
                         ProcessName = processName,
-                        Timestamp = DateTime.Now
+                        Timestamp = DateTime.Now,
+                        DurationMs = track.Stopwatch.ElapsedMilliseconds
                     };
 
                     OnSessionCompleted?.Invoke(this, session);
@@ -200,13 +210,17 @@ namespace SoapProxyApp
 
         private async Task OnResponse(object sender, SessionEventArgs e)
         {
-            if (e.UserData as string == "MOCKED") return;
+            var track = e.UserData as SessionTrack;
+            if (track?.Status == "MOCKED" || e.UserData as string == "MOCKED") return;
 
             // When response is complete, read it with size limit protection (20 MB limit)
             if (e.HttpClient.Response.HasBody && e.HttpClient.Response.ContentLength < 20 * 1024 * 1024)
             {
                 await e.GetResponseBodyAsString();
             }
+
+            track?.Stopwatch.Stop();
+            long durationMs = track?.Stopwatch.ElapsedMilliseconds ?? 0;
 
             var soapActionHeader = e.HttpClient.Request.Headers.FirstOrDefault(h => h.Name.Equals("SOAPAction", StringComparison.OrdinalIgnoreCase));
             string processName = "Unknown";
@@ -233,10 +247,12 @@ namespace SoapProxyApp
                 ResponseBody = responseBody,
                 ResponseBodyBytes = e.HttpClient.Response.IsBodyRead ? e.HttpClient.Response.Body : null,
                 SoapAction = soapActionHeader?.Value,
-                ProcessName = processName
+                ProcessName = processName,
+                DurationMs = durationMs
             };
 
-            e.UserData = "CAPTURED";
+            if (track != null) track.Status = "CAPTURED";
+            else e.UserData = "CAPTURED";
 
             // Send captured session to the UI
             OnSessionCompleted?.Invoke(this, session);
@@ -244,12 +260,17 @@ namespace SoapProxyApp
 
         private Task OnAfterResponse(object sender, SessionEventArgs e)
         {
+            var track = e.UserData as SessionTrack;
             // If already processed in mock rule or OnResponse, skip
-            if (e.UserData as string == "MOCKED" || e.UserData as string == "CAPTURED") return Task.CompletedTask;
+            if (track?.Status == "MOCKED" || track?.Status == "CAPTURED" || e.UserData as string == "MOCKED" || e.UserData as string == "CAPTURED")
+                return Task.CompletedTask;
 
             // Capture connection failures, timeouts, DNS errors (where StatusCode == 0 or exception thrown)
             if (e.Exception != null || e.HttpClient.Response == null || e.HttpClient.Response.StatusCode == 0)
             {
+                track?.Stopwatch.Stop();
+                long durationMs = track?.Stopwatch.ElapsedMilliseconds ?? 0;
+
                 string processName = "Unknown";
                 if (e.HttpClient.ProcessId != null && e.HttpClient.ProcessId.Value > 0)
                 {
@@ -272,10 +293,12 @@ namespace SoapProxyApp
                     ResponseBody = $"[Proxy Error - Connection Failed]{Environment.NewLine}{errorDetails}",
                     ResponseBodyBytes = System.Text.Encoding.UTF8.GetBytes($"[Proxy Error] {errorDetails}"),
                     ProcessName = processName,
-                    Timestamp = DateTime.Now
+                    Timestamp = DateTime.Now,
+                    DurationMs = durationMs
                 };
 
-                e.UserData = "CAPTURED";
+                if (track != null) track.Status = "CAPTURED";
+                else e.UserData = "CAPTURED";
                 OnSessionCompleted?.Invoke(this, session);
             }
 

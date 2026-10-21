@@ -3,6 +3,9 @@
 **SoapProxyApp** is an open-source HTTP/HTTPS traffic monitor and API mocking tool for Windows. Designed specifically for .NET developers working with WCF, SOAP, and REST web services, it serves as a fast, lightweight, and portable alternative to Fiddler, Charles Proxy, or Postman.
 
 ## Key Features
+- **Sortable Grid View & Response Duration:** Inspect response duration (`Duration`) for every request/response pair and sort sessions by any column (`Time`, `Status`, `Method`, `Duration`, `Size`, `App`, `URL`, or custom headers).
+- **Custom Header Columns:** Add any HTTP Request or Response header (e.g., `SOAPAction`, `X-Correlation-ID`, `Content-Type`, `Authorization`) as a sortable column in the grid.
+- **Persistent Preferences & Auto-Start:** Automatically remembers your Filter, Port, Auto-Start Proxy, System Proxy toggle, Theme, and Custom Columns across restarts.
 - **API Auto-Responder & Mocking:** Intercept outgoing API requests and return fake payloads to test edge-cases, simulate offline development, or inject 500 Server Errors without touching the real backend.
 - Intercept HTTP/HTTPS request and response packets (Explicit or Global System Proxy)
 - **Capture a single app without System Proxy:** launch Visual Studio / any program, or attach IIS App Pools, so their SOAP and REST calls go through the proxy without code changes
@@ -45,6 +48,13 @@ Use **🎯 Capture App** (enabled while the proxy is running) to capture SOAP **
 - IIS App Pool environment variables require IIS 10 or newer.
 
 ## What's New (Changelog)
+
+### v2.3.0
+- **Response Duration Tracking:** Measures and displays exact response time (`Duration`, e.g. `142 ms` / `1.25 s`) for every captured, mocked, replayed, and failed request/response pair.
+- **Sortable Grid View:** Upgraded the session list to a full `DataGrid` where every column (`Time`, `Status`, `Method`, `Duration`, `Size`, `App`, `URL`) supports one-click ascending/descending sorting (with numeric sorting on `Duration` and `Size`).
+- **Custom Request/Response Header Columns (`➕ Columns ▾`):** Add any standard or custom HTTP Request/Response header (such as `SOAPAction`, `X-Correlation-ID`, `Authorization`, `Server`, etc.) as a live, sortable column in the grid, and filter by its values.
+- **Auto-Start Proxy on Launch:** Added an **Auto-Start** checkbox in the top bar to automatically start the proxy when the application opens.
+- **Remember & Restore Filter & Settings:** Automatically saves and restores the session filter text, proxy port, Auto-Start toggle, System Proxy toggle, Dark/Light theme, and custom header columns across application restarts.
 
 ### v2.2.0
 - **🎯 Capture App - Launch Program with Proxy:** Capture REST (`HttpClient`) and SOAP calls from a single application without changing its code or enabling System Proxy. Launch Visual Studio, VS Code, a console or any `.exe` with `HTTP_PROXY` / `HTTPS_PROXY` / `NO_PROXY` pointing to the proxy; child processes (e.g. F5) inherit them. Recent launches are remembered.

@@ -129,7 +129,8 @@ namespace SoapProxyApp
                             ResponseBody = mockRule.ResponseBody ?? "",
                             ResponseBodyBytes = Encoding.UTF8.GetBytes(mockRule.ResponseBody ?? ""),
                             ProcessName = "SoapProxyApp (Replay Mocked)",
-                            Timestamp = DateTime.Now
+                            Timestamp = DateTime.Now,
+                            DurationMs = 0
                         };
 
                         onComplete?.Invoke(capturedMock);
@@ -137,8 +138,10 @@ namespace SoapProxyApp
                         return;
                     }
 
+                    var sw = System.Diagnostics.Stopwatch.StartNew();
                     var response = await client.SendAsync(request);
                     byte[] resBytes = await response.Content.ReadAsByteArrayAsync();
+                    sw.Stop();
                     string resString = Encoding.UTF8.GetString(resBytes);
 
                     var resHeaders = string.Join(Environment.NewLine, response.Headers.Select(h => $"{h.Key}: {string.Join(", ", h.Value)}"));
@@ -159,7 +162,8 @@ namespace SoapProxyApp
                         ResponseBody = resString,
                         ResponseBodyBytes = resBytes,
                         ProcessName = "SoapProxyApp (Replay)",
-                        Timestamp = DateTime.Now
+                        Timestamp = DateTime.Now,
+                        DurationMs = sw.ElapsedMilliseconds
                     };
 
                     onComplete?.Invoke(captured);

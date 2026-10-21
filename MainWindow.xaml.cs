@@ -25,6 +25,8 @@ namespace SoapProxyApp
     {
         private ProxyEngine proxyEngine;
         private int runningPort;
+        private AppSettings appSettings;
+        private bool isLoadingSettings;
         public ObservableCollection<CapturedSession> Sessions { get; set; }
         private bool isDarkMode = false;
         private IHighlightingDefinition lightXml;
@@ -71,9 +73,62 @@ namespace SoapProxyApp
             SearchPanel.Install(TxtResXmlFormatted);
             SearchPanel.Install(TxtResJson);
 
+            LoadAndApplyUserSettings();
+            Loaded += MainWindow_Loaded;
+
             _ = CheckForUpdatesAsync();
             CheckStaleSystemProxy();
             CheckStaleIisAppPools();
+        }
+
+        private void LoadAndApplyUserSettings()
+        {
+            isLoadingSettings = true;
+            try
+            {
+                appSettings = AppSettings.Load();
+                TxtPort.Text = appSettings.Port.ToString();
+                ChkAutoStart.IsChecked = appSettings.AutoStartProxy;
+                ChkSystemProxy.IsChecked = appSettings.UseSystemProxy;
+                if (appSettings.IsDarkMode && !isDarkMode)
+                {
+                    BtnTheme_Click(null, null);
+                }
+                SyncCustomHeaderColumns();
+                if (!string.IsNullOrEmpty(appSettings.FilterText))
+                {
+                    TxtFilter.Text = appSettings.FilterText;
+                }
+            }
+            finally
+            {
+                isLoadingSettings = false;
+            }
+        }
+
+        private void SaveUserSettings()
+        {
+            if (isLoadingSettings || appSettings == null) return;
+            if (int.TryParse(TxtPort.Text, out int p) && p >= 1 && p <= 65535)
+                appSettings.Port = p;
+            appSettings.AutoStartProxy = ChkAutoStart.IsChecked == true;
+            appSettings.UseSystemProxy = ChkSystemProxy.IsChecked == true;
+            appSettings.FilterText = TxtFilter.Text ?? "";
+            appSettings.IsDarkMode = isDarkMode;
+            appSettings.Save();
+        }
+
+        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (appSettings?.AutoStartProxy == true && runningPort == 0)
+            {
+                BtnStart_Click(this, new RoutedEventArgs());
+            }
+        }
+
+        private void ChkAutoStart_Changed(object sender, RoutedEventArgs e)
+        {
+            SaveUserSettings();
         }
 
         private void CheckStaleIisAppPools()
@@ -225,6 +280,7 @@ namespace SoapProxyApp
                 TxtResXmlFormatted.SyntaxHighlighting = lightXml;
                 TxtResJson.SyntaxHighlighting = lightJson;
             }
+            SaveUserSettings();
         }
 
         private void BtnStart_Click(object sender, RoutedEventArgs e)
@@ -260,6 +316,7 @@ namespace SoapProxyApp
             BtnCapture.IsEnabled = true;
             TxtStatus.Text = $"Proxy is running on 127.0.0.1:{port}" + (isSystemProxy ? " (System Proxy)" : "");
             TxtStatus.Foreground = System.Windows.Media.Brushes.Green;
+            SaveUserSettings();
         }
 
         // Checks both the OS listener table and an actual exclusive bind attempt.
@@ -493,24 +550,211 @@ namespace SoapProxyApp
 
         private void TxtFilter_TextChanged(object sender, TextChangedEventArgs e)
         {
+            SaveUserSettings();
             string filterText = TxtFilter.Text.ToLower();
+            var view = System.Windows.Data.CollectionViewSource.GetDefaultView(Sessions);
             if (string.IsNullOrWhiteSpace(filterText))
             {
-                System.Windows.Data.CollectionViewSource.GetDefaultView(Sessions).Filter = null;
+                view.Filter = null;
             }
             else
             {
-                System.Windows.Data.CollectionViewSource.GetDefaultView(Sessions).Filter = item =>
+                view.Filter = item =>
                 {
                     if (item is CapturedSession s)
                     {
-                        return (s.Url?.ToLower().Contains(filterText) == true) ||
-                               (s.ProcessName?.ToLower().Contains(filterText) == true) ||
-                               (s.Method?.ToLower().Contains(filterText) == true) ||
-                               (s.StatusCode.ToString().Contains(filterText) == true);
+                        if ((s.Url?.ToLower().Contains(filterText) == true) ||
+                            (s.ProcessName?.ToLower().Contains(filterText) == true) ||
+                            (s.Method?.ToLower().Contains(filterText) == true) ||
+                            (s.StatusCode.ToString().Contains(filterText) == true))
+                            return true;
+
+                        if (appSettings?.CustomHeaderColumns != null)
+                        {
+                            foreach (var hdr in appSettings.CustomHeaderColumns)
+                            {
+                                if (s.GetHeaderValue(hdr)?.ToLower().Contains(filterText) == true)
+                                    return true;
+                            }
+                        }
                     }
                     return false;
                 };
+            }
+        }
+
+        private static readonly string[] PresetHeaderNames = new[]
+        {
+            "SOAPAction",
+            "Content-Type",
+            "X-Correlation-Id",
+            "X-Request-Id",
+            "Authorization",
+            "Server",
+            "User-Agent"
+        };
+
+        private void BtnColumns_Click(object sender, RoutedEventArgs e)
+        {
+            RebuildColumnsMenu();
+            BtnColumns.ContextMenu.PlacementTarget = BtnColumns;
+            BtnColumns.ContextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+            BtnColumns.ContextMenu.IsOpen = true;
+        }
+
+        private void RebuildColumnsMenu()
+        {
+            MenuColumns.Items.Clear();
+
+            var addItem = new MenuItem { Header = "➕ Add Custom Header Column...", FontWeight = FontWeights.Bold };
+            addItem.Click += (s, e) => PromptAndAddCustomHeader();
+            MenuColumns.Items.Add(addItem);
+            MenuColumns.Items.Add(new Separator());
+
+            var allHeaders = PresetHeaderNames
+                .Concat(appSettings?.CustomHeaderColumns ?? Enumerable.Empty<string>())
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            foreach (var hdr in allHeaders)
+            {
+                bool isActive = appSettings?.CustomHeaderColumns?.Any(c => c.Equals(hdr, StringComparison.OrdinalIgnoreCase)) == true;
+                var mi = new MenuItem
+                {
+                    Header = hdr,
+                    IsCheckable = true,
+                    IsChecked = isActive
+                };
+                string capturedHdr = hdr;
+                mi.Click += (s, e) => ToggleCustomHeaderColumn(capturedHdr);
+                MenuColumns.Items.Add(mi);
+            }
+
+            if (appSettings?.CustomHeaderColumns?.Count > 0)
+            {
+                MenuColumns.Items.Add(new Separator());
+                var clearItem = new MenuItem { Header = "🗑 Remove All Custom Columns", Foreground = System.Windows.Media.Brushes.Red };
+                clearItem.Click += (s, e) =>
+                {
+                    appSettings.CustomHeaderColumns.Clear();
+                    SyncCustomHeaderColumns();
+                    SaveUserSettings();
+                };
+                MenuColumns.Items.Add(clearItem);
+            }
+        }
+
+        private void ToggleCustomHeaderColumn(string headerName)
+        {
+            if (string.IsNullOrWhiteSpace(headerName) || appSettings == null) return;
+            headerName = headerName.Trim().TrimEnd(':');
+
+            int idx = appSettings.CustomHeaderColumns.FindIndex(c => c.Equals(headerName, StringComparison.OrdinalIgnoreCase));
+            if (idx >= 0)
+                appSettings.CustomHeaderColumns.RemoveAt(idx);
+            else
+                appSettings.CustomHeaderColumns.Add(headerName);
+
+            SyncCustomHeaderColumns();
+            SaveUserSettings();
+        }
+
+        private void PromptAndAddCustomHeader()
+        {
+            var dlg = new Window
+            {
+                Title = "Add Custom Header Column",
+                Width = 380,
+                Height = 165,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner,
+                ResizeMode = ResizeMode.NoResize,
+                Owner = this,
+                Background = (System.Windows.Media.Brush)FindResource("WindowBg")
+            };
+
+            var root = new StackPanel { Margin = new Thickness(14) };
+            root.Children.Add(new TextBlock
+            {
+                Text = "Enter Request or Response header name (e.g. X-Correlation-Id, SOAPAction, Server):",
+                Foreground = (System.Windows.Media.Brush)FindResource("TextFg"),
+                TextWrapping = TextWrapping.Wrap,
+                Margin = new Thickness(0, 0, 0, 8)
+            });
+
+            var txt = new TextBox
+            {
+                Height = 28,
+                Padding = new Thickness(5, 3, 5, 3),
+                BorderThickness = new Thickness(1),
+                BorderBrush = (System.Windows.Media.Brush)FindResource("BorderColor"),
+                Background = (System.Windows.Media.Brush)FindResource("PanelBg"),
+                Foreground = (System.Windows.Media.Brush)FindResource("TextFg")
+            };
+            root.Children.Add(txt);
+
+            var btnRow = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right, Margin = new Thickness(0, 12, 0, 0) };
+            var btnAdd = new Button { Content = "Add Column", Width = 95, Height = 28, Margin = new Thickness(0, 0, 8, 0), IsDefault = true, Style = (Style)FindResource("AppButtonStyle"), FontWeight = FontWeights.Bold };
+            var btnCancel = new Button { Content = "Cancel", Width = 75, Height = 28, IsCancel = true, Style = (Style)FindResource("AppButtonStyle") };
+
+            btnAdd.Click += (s, e) =>
+            {
+                string val = txt.Text?.Trim().TrimEnd(':');
+                if (!string.IsNullOrWhiteSpace(val))
+                {
+                    if (!appSettings.CustomHeaderColumns.Any(c => c.Equals(val, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        appSettings.CustomHeaderColumns.Add(val);
+                        SyncCustomHeaderColumns();
+                        SaveUserSettings();
+                    }
+                    dlg.DialogResult = true;
+                }
+            };
+
+            btnRow.Children.Add(btnAdd);
+            btnRow.Children.Add(btnCancel);
+            root.Children.Add(btnRow);
+            dlg.Content = root;
+            dlg.Loaded += (s, e) => txt.Focus();
+            dlg.ShowDialog();
+        }
+
+        private void SyncCustomHeaderColumns()
+        {
+            if (LstSessions == null) return;
+
+            // Remove existing dynamic custom columns (keep the 7 built-in columns: Time, Status, Method, Duration, Size, App, URL)
+            for (int i = LstSessions.Columns.Count - 1; i >= 0; i--)
+            {
+                if (LstSessions.Columns[i].Header is string h && h.StartsWith("[") && h.EndsWith("]"))
+                {
+                    LstSessions.Columns.RemoveAt(i);
+                }
+            }
+
+            if (appSettings?.CustomHeaderColumns == null) return;
+
+            // Insert each custom header column just before the last column (URL)
+            foreach (var rawHeader in appSettings.CustomHeaderColumns)
+            {
+                string hdr = rawHeader?.Trim();
+                if (string.IsNullOrEmpty(hdr)) continue;
+
+                var elemStyle = new Style(typeof(TextBlock));
+                elemStyle.Setters.Add(new Setter(TextBlock.TextTrimmingProperty, TextTrimming.CharacterEllipsis));
+                elemStyle.Setters.Add(new Setter(FrameworkElement.ToolTipProperty, new System.Windows.Data.Binding($"[{hdr}]") { Mode = System.Windows.Data.BindingMode.OneWay }));
+
+                var col = new DataGridTextColumn
+                {
+                    Header = $"[{hdr}]",
+                    Binding = new System.Windows.Data.Binding($"[{hdr}]") { Mode = System.Windows.Data.BindingMode.OneWay },
+                    SortMemberPath = $"[{hdr}]",
+                    Width = new DataGridLength(150),
+                    ElementStyle = elemStyle
+                };
+
+                int insertIdx = Math.Max(0, LstSessions.Columns.Count - 1);
+                LstSessions.Columns.Insert(insertIdx, col);
             }
         }
 
@@ -553,8 +797,12 @@ namespace SoapProxyApp
             Dispatcher.Invoke(() =>
             {
                 Sessions.Add(session);
-                // Scroll to bottom automatically
-                LstSessions.ScrollIntoView(session);
+                var view = System.Windows.Data.CollectionViewSource.GetDefaultView(Sessions);
+                if (view?.SortDescriptions.Count == 0)
+                {
+                    // Scroll to bottom automatically when in chronological order
+                    LstSessions.ScrollIntoView(session);
+                }
             });
         }
 
@@ -981,6 +1229,7 @@ namespace SoapProxyApp
 
         protected override void OnClosed(EventArgs e)
         {
+            SaveUserSettings();
             proxyEngine.Stop();
             try { IisAppPoolProxyManager.DetachAll(); } catch { }
             base.OnClosed(e);
